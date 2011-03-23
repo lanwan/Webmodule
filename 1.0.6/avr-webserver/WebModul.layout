@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
+<CodeBlocks_layout_file>
+	<ActiveTarget name="Debug" />
+	<File name="cmd.c" open="1" top="0" tabpos="3">
+		<Cursor position="10201" topLine="283" />
+	</File>
+	<File name="config.h" open="1" top="0" tabpos="4">
+		<Cursor position="0" topLine="57" />
+	</File>
+	<File name="httpd.h" open="1" top="0" tabpos="2">
+		<Cursor position="1633" topLine="35" />
+	</File>
+	<File name="makefile" open="0" top="0" tabpos="6">
+		<Cursor position="877" topLine="18" />
+	</File>
+	<File name="networkcard/enc28j60.c" open="1" top="1" tabpos="6">
+		<Cursor position="1466" topLine="27" />
+	</File>
+	<File name="networkcard/enc28j60.h" open="1" top="0" tabpos="5">
+		<Cursor position="0" topLine="0" />
+	</File>
+	<File name="usart.h" open="1" top="0" tabpos="1">
+		<Cursor position="3859" topLine="96" />
+	</File>
+</CodeBlocks_layout_file>

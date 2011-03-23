@@ -1,0 +1,86 @@
+# depslib dependency file v1.0
+1224626414 source:/main/Projects/Electronic/Web-Module/Software/Tmp/1.0.6/avr-webserver/1-wire/crc8.c
+	<stdint.h>
+
+1205832840 source:/main/Projects/Electronic/Web-Module/Software/Tmp/1.0.6/avr-webserver/1-wire/delay.c
+	<avr/io.h>
+	<avr/io.h>
+	<inttypes.h>
+	"delay.h"
+
+1205832840 /main/Projects/Electronic/Web-Module/Software/Tmp/1.0.6/avr-webserver/1-wire/delay.h
+	<inttypes.h>
+	<avr/io.h>
+
+1232284014 source:/main/Projects/Electronic/Web-Module/Software/Tmp/1.0.6/avr-webserver/1-wire/ds18x20.c
+	<stdint.h>
+	<stdlib.h>
+	<stdio.h>
+	<avr/io.h>
+	<avr/pgmspace.h>
+	"../config.h"
+	"ds18x20.h"
+	"onewire.h"
+	"crc8.h"
+	"../usart.h"
+	<util/delay.h>
+	<string.h>
+
+1300131805 /main/Projects/Electronic/Web-Module/Software/Tmp/1.0.6/avr-webserver/config.h
+	<stdint.h>
+	"sdkarte/fat16.h"
+
+1211661812 /main/Projects/Electronic/Web-Module/Software/Tmp/1.0.6/avr-webserver/sdkarte/fat16.h
+	"fat16_config.h"
+	<stdint.h>
+
+1212343442 /main/Projects/Electronic/Web-Module/Software/Tmp/1.0.6/avr-webserver/sdkarte/fat16_config.h
+
+1224626720 /main/Projects/Electronic/Web-Module/Software/Tmp/1.0.6/avr-webserver/1-wire/ds18x20.h
+
+1226101512 /main/Projects/Electronic/Web-Module/Software/Tmp/1.0.6/avr-webserver/1-wire/onewire.h
+
+1224626710 /main/Projects/Electronic/Web-Module/Software/Tmp/1.0.6/avr-webserver/1-wire/crc8.h
+
+1300131870 /main/Projects/Electronic/Web-Module/Software/Tmp/1.0.6/avr-webserver/usart.h
+
+1232296964 source:/main/Projects/Electronic/Web-Module/Software/Tmp/1.0.6/avr-webserver/1-wire/onewire.c
+	"../config.h"
+	<stdint.h>
+	<stdio.h>
+	<avr/io.h>
+	<avr/interrupt.h>
+	<util/delay.h>
+	"onewire.h"
+	"../usart.h"
+
+1239619440 source:/main/Projects/Electronic/Web-Module/Software/Tmp/1.0.6/avr-webserver/analog.c
+	"config.h"
+	<avr/io.h>
+	<avr/interrupt.h>
+	<avr/pgmspace.h>
+	"analog.h"
+
+1224857844 /main/Projects/Electronic/Web-Module/Software/Tmp/1.0.6/avr-webserver/analog.h
+
+1224877948 source:/main/Projects/Electronic/Web-Module/Software/Tmp/1.0.6/avr-webserver/base64.c
+	<avr/pgmspace.h>
+	"base64.h"
+
+1224877870 /main/Projects/Electronic/Web-Module/Software/Tmp/1.0.6/avr-webserver/base64.h
+
+1236458452 source:/main/Projects/Electronic/Web-Module/Software/Tmp/1.0.6/avr-webserver/camera/cam.c
+	<avr/interrupt.h>
+	<avr/io.h>
+	"../config.h"
+	"cam.h"
+
+1226019390 /main/Projects/Electronic/Web-Module/Software/Tmp/1.0.6/avr-webserver/camera/cam.h
+
+1209307578 source:/main/Projects/Electronic/Web-Module/Software/Tmp/1.0.6/avr-webserver/camera/servo.c
+	"servo.h"
+
+1206986972 /main/Projects/Electronic/Web-Module/Software/Tmp/1.0.6/avr-webserver/camera/servo.h
+	"../config.h"
+	<avr/io.h>
+

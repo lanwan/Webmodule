@@ -1,0 +1,122 @@
+<HTML>
+<HEAD>
+  <!-- Created with AOLpress/2.0 -->
+  <TITLE>AVR GCC Example: IR RC5 Decoding</TITLE>
+</HEAD>
+<BODY BGCOLOR="#c0dcc0">
+<H2 ALIGN=Center>
+  RC5 - Dekoder
+</H2>
+<H4>
+  Einleitung:
+</H4>
+<P>
+Der RC5-Code wird in Infrarot-Ferndedienungen von Philips verwendet und
+&nbsp;ist sehr gut dokumentiert. Daher wird er sehr gerne in eigenen Projekten
+verwendet<BR>
+Ich &nbsp;m&ouml;chte hier nicht weiter auf den Aufbau eingehen, da es dazu
+bereits eine Menge guter Seiten gibt.
+<P>
+<H4>
+  Nachteile &uuml;blicher L&ouml;sungen:
+</H4>
+<P>
+Oftmals sieht man die Verwendung zweier Interrupts, eines externen Interrupts,
+um die Startflanke zu erkennen und eines Timerinterupts, um danach die einzelnen
+Bits abzutasten. Diese L&ouml;sung hat aber mehrere gravierende Nachteile:
+<UL>
+  <LI>
+    Es wird ein externer Interrupt verschwendet
+  <LI>
+    Es wird ein Timerinterrupt verschwendet, indem ein Timer im Start-Stop-Betrieb
+    arbeitet. Damit ist dieser Timer nicht mehr f&uuml;r weitere
+    Zeitbasis-Anwendungen verwendbar.
+  <LI>
+    Es ist nicht jeder Eingang zum IR-Empfang verwendbar
+  <LI>
+    Es erfolgt keine Bitsynchronisation, dadurch ist der Empfanmg leicht
+    st&ouml;rbar bzw. Frequenztoleranzen &uuml;ber 3% k&ouml;nnen schon den Empfang
+    unm&ouml;glich machen.&nbsp;
+</UL>
+<P>
+<H4>
+  Vorteile meiner L&ouml;sung:
+</H4>
+<P>
+Beim RC5-Signal betr&auml;gt die Bitzeit 1,778ms. Das ist aus der Sicht des
+AVR schon eine elendlange Zeitdauer, d.h. solche langen Zeiten pollt man
+daher besser im Timerinterrupt: Dadurch ergeben sich folgende Vorteile:
+<UL>
+  <LI>
+    Der Timer ist durchlaufend und dadurch noch f&uuml;r weitere
+    Zeitbasis-Anwendungen verf&uuml;gbar.
+  <LI>
+    Es wird nur ein Interrupt verwendet, dadurch ist der Code einfacher und kleiner
+  <LI>
+    Es erfolgt eine Bitsynchronisation und damit sind selbst Abweichungen von
+    10% ohne Einflu&szlig;
+  <LI>
+    Es erfolgt eine Pulspr&uuml;fung und dadurch werden St&ouml;rsignale bzw.
+    Codes anderer Fernbedienungen weitgehend unterdr&uuml;ckt
+</UL>
+<P>
+<H4>
+  Funktionsbeschreibung:
+</H4>
+<P>
+Wenn man sich den Aufbau des RC5-Signals ansieht, besteht jedes Bit aus einer
+Flanke in der Mitte der Bitzeit, wobei der Pegel nach der Flanke dem Bitwert
+entspricht. Da die IR-Empf&auml;nger einen invertierten Ausgang haben, mu&szlig;
+man also den Wert nach der Flanke invertieren. Jedes RC5-Paket beginnt also
+mit einer 1-&gt;0 Flanke und entspricht damit dem Startbit !0 = 1.
+<P>
+Die Flankenerkennung erfolgt dadurch, da&szlig; sich der letzte Zustand des
+Eingangs gemerkt wird und mittels EXOR mit dem neuen Zustand verglichen wird.
+Die EXOR-Verkn&uuml;pfung ist also war, wenn die beiden Eingangswerte
+unterschiedlich sind, d.h. nach jeder Flanke.<BR>
+Danach mu&szlig; man nur im Bitabstand weiter abtasten und voila, nach 14
+Bitzeiten hat man alle Bits.<BR>
+Damit es nun dabei nicht zu Zeitverschiebungen aufgrund zu hoher Toleranzen
+kommt, wird bei jeder Flanke neu synchronisiert. Um die Hilfsflanken
+auszublenden, werden nur Flanken, die nach 0,8 ... 1,2 Bitzeiten kommen
+ausgewertet.<BR>
+Zur Vermeidung der Reaktion auf fremde Codes werden Pulse, die k&uuml;rzer
+als 0,4 Bitzeiten sind, als Fehler erkannt und die Empfangsroutine
+r&uuml;ckgesetzt.<BR>
+Wird nun nach dem letzten Impuls f&uuml;r 1,2 Bitzeiten keine weitere Flanke
+erkannt, wird gepr&uuml;ft, ob auch genau 14 Bits empfangen wurden (wird
+an der Position des Startbits erkannt) und dann diese in das Datenregister
+ausgegeben. Ansonsten werden die Empfangsdaten verworfen.
+<P>
+Der Timerinerrupt wurde so eingestellt, da&szlig; er alle 512 Zyklen aufgerufen
+wird. Damit ergeben sich bei 4MHz je Bitzeit 4e6/512*1.778e-3=14 Aufrufe
+des Timerinterrupts. Das ist ausreichend fein gestaffelt, um die verschiedenen
+Zeitbedingungen testen zu k&ouml;nnen. Bei h&ouml;heren Quarzfrequenzen kann
+man die Zyklenzahl entsprechend erh&ouml;hen.
+<P>
+Hier die komplette Interruptroutine:
+<UL>
+  <LI>
+    <A HREF="rc5.c">RC5.C</A>
+</UL>
+<P>
+<H4>
+  Testprogramm:
+</H4>
+<P>
+Zu dem Testprogramm gibt es nichts besonderes zu sagen. Sobald ein kompletter
+RC5-Code empfangen wuirde, wird dieser &uuml;ber die UART ausgegeben, getrennt
+nach Toggle-Bit, Ger&auml;te-Adresse und Tastenkode.<BR>
+Zus&auml;tzlich werden die untersten 8 Bits auf LEDs an PORTB ausgegeben.<BR>
+<UL>
+  <LI>
+    <A HREF="main.c">MAIN.C</A>
+  <LI>
+    <A HREF="main.h">MAIN.H</A>
+</UL>
+<P>
+.
+<P>
+<P>
+<A HREF="http://www.specs.de/users/danni/"><IMG SRC="homeicon.gif"></A>
+</BODY></HTML>

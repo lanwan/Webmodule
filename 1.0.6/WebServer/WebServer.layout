@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
+<CodeBlocks_layout_file>
+	<ActiveTarget name="Debug" />
+	<File name="../avr-webserver/1-wire/crc8.c" open="1" top="0" tabpos="6">
+		<Cursor position="1037" topLine="47" />
+	</File>
+	<File name="../avr-webserver/1-wire/ds18x20.c" open="1" top="0" tabpos="2">
+		<Cursor position="4891" topLine="171" />
+	</File>
+	<File name="../avr-webserver/camera/cam.c" open="0" top="0" tabpos="0">
+		<Cursor position="5457" topLine="0" />
+	</File>
+	<File name="../avr-webserver/cmd.c" open="1" top="0" tabpos="3">
+		<Cursor position="1912" topLine="42" />
+	</File>
+	<File name="../avr-webserver/config.h" open="0" top="0" tabpos="0">
+		<Cursor position="9563" topLine="264" />
+	</File>
+	<File name="../avr-webserver/dns.c" open="1" top="0" tabpos="5">
+		<Cursor position="298" topLine="0" />
+	</File>
+	<File name="../avr-webserver/httpd.h" open="1" top="0" tabpos="7">
+		<Cursor position="1572" topLine="36" />
+	</File>
+	<File name="../avr-webserver/main.c" open="0" top="0" tabpos="0">
+		<Cursor position="16235" topLine="512" />
+	</File>
+	<File name="../avr-webserver/networkcard/enc28j60.h" open="0" top="0" tabpos="0">
+		<Cursor position="2961" topLine="94" />
+	</File>
+	<File name="../avr-webserver/ntp.c" open="1" top="0" tabpos="4">
+		<Cursor position="0" topLine="0" />
+	</File>
+	<File name="../avr-webserver/sendmail.c" open="0" top="0" tabpos="0">
+		<Cursor position="0" topLine="93" />
+	</File>
+	<File name="../avr-webserver/stack.c" open="0" top="0" tabpos="0">
+		<Cursor position="38164" topLine="1334" />
+	</File>
+	<File name="../avr-webserver/stack.h" open="0" top="0" tabpos="0">
+		<Cursor position="3023" topLine="102" />
+	</File>
+	<File name="../avr-webserver/translate.c" open="0" top="0" tabpos="0">
+		<Cursor position="755" topLine="30" />
+	</File>
+	<File name="../avr-webserver/usart.c" open="0" top="0" tabpos="0">
+		<Cursor position="3148" topLine="91" />
+	</File>
+	<File name="../avr-webserver/usart.h" open="1" top="1" tabpos="1">
+		<Cursor position="3695" topLine="54" />
+	</File>
+</CodeBlocks_layout_file>

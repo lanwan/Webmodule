@@ -1,0 +1,2385 @@
+------------------------------------------------------------------------------------------------------
+Unterschiedebericht 1.1.05 -> 1.1.06
+Projekt: $/avr-webserver
+Geändert:
+main.c
+messung.c
+messung.h
+ntp.c
+stack.c
+timer.c
+timer.h
+------------------------
+main.c
+ 91 Änderung:  * In diesem Projekt werden einige Erweiterungen zur ETH32-Softwar
+        In:  * In diesem Projekt werden einige \ref mainloop "Erweiterungen zu
+157 Änderung:  *	sind je nach Hardwareausstattung und benötigter Funktionalität 
+        In:  *	sind je nach Hardwareausstattung und benötigter Funktionalität 
+168    Einfg:  * siehe auch Beschreibung der \ref mainloop "Hauptschleife" weite
+172 Änderung:  * \file
+        In:  * \file Hauptprogramm
+173    Entf:  * Hauptprogramm
+176    Einfg:  *
+200    Einfg: /**
+201    Einfg:  **	lokale Prototypen für Timerfunktionen
+202    Einfg: */
+203    Einfg: void read_T(void);
+204    Einfg: 
+237 Änderung: 	back_light = 1;
+        In: 	back_light = 10;
+254 Änderung: 		back_light = 0;
+        In: 		back_light = 10;
+265    Entf:         ntp_request();
+299    Einfg: 	 * \anchor mainloop
+332    Einfg: 			eth.timer = 1;
+341 Änderung: 					// tu was ...
+        In: 					if (machineStatus.Timer2_func)
+349    Einfg: 						machineStatus.Timer2_func();	// ausführen
+350    Einfg: 				}
+351    Einfg: 			}
+352    Einfg: 
+353    Einfg: 			#if USE_SER_LCD
+354    Einfg: 			if (back_light) {
+355    Einfg: 				if (--back_light == 0) {
+356    Einfg: 					lcd_clear();				// Licht aus !
+357    Einfg: 				}
+359    Einfg: 			#endif
+360    Einfg: 
+362    Einfg: 
+363    Einfg: 		/**
+364    Einfg: 		*	\anchor t3timer
+365    Einfg: 		*	<H3>Countdown-Timer</H3>
+366    Einfg: 		*
+367    Einfg: 		*	Timer3 wird in ISR(TIMER1_COMPA_vect) im Takt von TIMERBASE
+368    Einfg: 		*	heruntergezählt. Bei Erreichen von Null wird das Flag Time3Ela
+369    Einfg: 		*	gesetzt, was hier ausgewertet wird. Falls der Funktionszeiger
+370    Einfg: 		*	Timer3_func nicht NULL ist, wird die entsprechende Funktion
+371    Einfg: 		*	aufgerufen.
+372    Einfg: 		*
+373    Einfg: 		*	Beispiel:
+374    Einfg: 		*	\code
+375    Einfg: 		*	if (!machineStatus.Timer3) {			// wenn Timer3 nicht belegt ist
+376    Einfg: 		*		machineStatus.Timer3 = start_OW();	// liefert Wartezeit (750 
+377    Einfg: 		*		machineStatus.Timer3_func = read_T;	// Funktionspointer für a
+378    Einfg: 		*	}
+379    Einfg: 		*	\endcode
+380    Einfg: 		*
+381    Einfg: 		*/
+382    Einfg: 		if (machineStatus.Time3Elapsed) {
+383    Einfg: 			machineStatus.Time3Elapsed = false;
+384    Einfg: 			if (machineStatus.Timer3_func)
+385    Einfg: 				machineStatus.Timer3_func();			// ausführen
+388    Einfg: 
+420    Einfg: 		#if USE_OW
+379    Entf: 			lese_Temperatur();
+380    Entf: 			machineStatus.LogSchreiben = true;		// danach gleich Logdatei s
+382 Änderung: 
+        In: 			machineStatus.Timer3 = start_OW();	// liefert Wartezeit (750 ms
+383 Änderung: 			#if USE_SER_LCD
+        In: 			machineStatus.Timer3_func = read_T;	// Funktionspointer für abg
+384 Änderung: 			char zeile[20];
+        In: 		}
+385    Entf: 
+386    Entf: 			lcd_clear();
+387    Entf: 			back_light = 1;
+388    Entf: 			lcd_print(0,0,"Aussen ");
+389    Entf: 			dtostrf(ow_array[0] / 10.0,5,1,zeile);
+390    Entf: 			lcd_print_str(zeile);
+391    Entf: 			lcd_print_str("C");
+392    Entf: 			lcd_print(1,0,"Innen  ");
+393    Entf: 			dtostrf(ow_array[1] / 10.0,5,1,zeile);
+394    Entf: 			lcd_print_str(zeile);
+395    Entf: 			lcd_print_str("C");
+397    Entf: 		}
+560    Entf: 					back_light = 1;
+606    Einfg: 					back_light = 30;	// für 30 Sekunden einschalten
+631    Entf: 		
+665    Einfg: #if USE_OW || DOXYGEN
+666    Einfg: /**
+667    Einfg:  *	\ingroup onewire
+668    Einfg:  *	Diese Funktion wird nach Ablauf des Messintervalls der 1-Wire S
+669    Einfg:  *	durch einen Funktionszeiger aufgerufen.
+670    Einfg:  */
+671    Einfg: void read_T(void)
+672    Einfg: {
+673    Einfg: 	lese_Temperatur();
+674    Einfg: 	machineStatus.LogSchreiben = true;		// danach gleich Logdatei sch
+675    Einfg: 	machineStatus.Timer3_func = NULL;		// vorsichtshalber Funktion lö
+676    Einfg: 
+677    Einfg: 	#if USE_SER_LCD
+678    Einfg: 	char zeile[20];
+679    Einfg: 
+680    Einfg: 	lcd_clear();
+681    Einfg: 	back_light = 10;	// 10 Sekunden einschalten
+682    Einfg: 	lcd_print(0,0,"Aussen ");
+683    Einfg: 	dtostrf(ow_array[0] / 10.0,5,1,zeile);
+684    Einfg: 	lcd_print_str(zeile);
+685    Einfg: 	lcd_print_str("C");
+686    Einfg: 	lcd_print(1,0,"Innen  ");
+687    Einfg: 	dtostrf(ow_array[1] / 10.0,5,1,zeile);
+688    Einfg: 	lcd_print_str(zeile);
+689    Einfg: 	lcd_print_str("C");
+690    Einfg: 	#endif
+691    Einfg: }
+692    Einfg: #endif
+693    Einfg: 
+------------------------
+messung.c
+ 70 Änderung: #if USE_OW
+        In: #if USE_OW || DOXYGEN
+117    Einfg: #if USE_OW || DOXYGEN
+118    Einfg: 
+119    Einfg: /**
+120    Einfg:  *	\ingroup messen
+121    Einfg:  *	neue Temperaturmessung starten
+122    Einfg:  *	\returns benötigte Wartezeit
+123    Einfg:  */
+124    Einfg: uint8_t start_OW(void)
+125    Einfg: {
+126    Einfg: #if OW_EXTERN_POWERED
+127    Einfg: 	// T messen: alle gleichzeitig starten
+128    Einfg: 	if ( DS18X20_start_meas( DS18X20_POWER_EXTERN, 0 ) == DS18X20_OK 
+129    Einfg: 		// warten bis Messung fertig ist.
+130    Einfg: 		// DS18S20 braucht die vollen 750ms
+131    Einfg: 		// - daher vorsichtshalber volle 750ms warten, falls unterschied
+132    Einfg: 		return (DS18B20_12_BIT/TIMERBASE);	// Wartezeit zurückgeben
+133    Einfg: 	}
+134    Einfg: 
+135    Einfg: 	MES_DEBUG("\r\n*** Messung fehlgeschlagen. (Kurzschluss?) ***");
+136    Einfg: 	return 0;	// es wird kein Timer eingeschaltet
+137    Einfg: #else
+138    Einfg: 	return 1;	// Timer auf Minimalzeit einschalten
+139    Einfg: #endif
+140    Einfg: }
+141    Einfg: 
+123    Entf: #if USE_OW
+125 Änderung: 	int16_t TWert;
+        In: 	uint16_t TWert;
+132    Entf: 	// T messen: alle gleichzeitig starten
+133    Entf: 	if ( DS18X20_start_meas( DS18X20_POWER_EXTERN, 0 ) == DS18X20_OK 
+134    Entf: 		// warten bis Messung fertig ist.
+135    Entf: 		// DS18S20 braucht die vollen 750ms
+136    Entf: 		// - daher vorsichtshalber volle 750ms warten, falls unterschied
+137    Entf: 		_delay_ms(DS18B20_12_BIT);
+138    Entf: 
+153 Änderung: 	}
+        In: 
+154    Entf: 	else {
+155    Entf: 		MES_DEBUG("\r\n*** Messung fehlgeschlagen. (Kurzschluss?) ***");
+156    Entf: 	}
+159 Änderung: 		// T messen
+        In: 		// T messen (einzeln starten und messen bei parasitärer Spannung
+169 Änderung: 				TWert = (int16_t)DS18X20_temp_to_decicel(subzero, cel, cel_fra
+        In: 				TWert = DS18X20_temp_to_decicel(subzero, cel, cel_frac_bits);
+176 Änderung: 				//DS18X20_show_id_uart( tempID, OW_ROMCODE_SIZE );
+        In: 				DS18X20_show_id_uart( tempID, OW_ROMCODE_SIZE );
+198    Einfg: }
+186 Änderung: }
+        In: #if USE_OW || DOXYGEN
+187    Entf: 
+188    Entf: #if USE_OW
+250 Änderung: #if USE_SCHEDULER
+        In: #if USE_SCHEDULER || DOXYGEN
+------------------------
+messung.h
+ 77 Änderung: #define S3An()		OUT_PORT |= (1<<PORT_SCHALTER2)
+        In: #define S3An()		OUT_PORT |= (1<<PORT_SCHALTER3)
+ 88    Einfg: uint8_t start_OW(void);
+------------------------
+ntp.c
+ 51    Einfg: #include <avr/eeprom.h>
+ 55    Einfg: #include "dns.h"
+ 56 Änderung: #if USE_NTP
+        In: #if USE_NTP || DOXYGEN
+ 57 Änderung: volatile unsigned int ntp_timer = NTP_REFRESH;	//!> Zeitspanne in 
+        In: volatile unsigned int ntp_timer;	//!> Zeitspanne in Sekunden nachd
+ 82 Änderung: 	//NTP IP aus EEPROM auslesen
+        In: 	// DNS Auflösung erzwingen
+ 83 Änderung: 	(*((unsigned long*)&ntp_server_ip[0])) = get_eeprom_value(NTP_IP_
+        In: 	(*((unsigned long*)&ntp_server_ip[0])) = 0L;
+ 86    Einfg: 	ntp_request();
+101    Einfg: 	uint32_t tmp_ip = (*(uint32_t*)&ntp_server_ip[0]);
+102    Einfg: 		
+103    Einfg: 	if ( tmp_ip == 0L ) {
+104    Einfg: 		dns_request(NTP_SERVER, (uint32_t *)&ntp_server_ip[0]);
+105    Einfg: 		ntp_timer = 4; // neuer Versuch nach 4 Sekunden
+106    Einfg: 		NTP_DEBUG(" no IP **\r\n");
+107    Einfg: 		return;
+108    Einfg: 	}
+109    Einfg: 	else {
+110    Einfg: 		uint32_t ee_ip = get_eeprom_value(NTP_IP_EEPROM_STORE,NTP_IP);
+111    Einfg: 		NTP_DEBUG("IP: %1i.%1i.%1i.%1i",ntp_server_ip[0],ntp_server_ip[1
+112    Einfg: 		if (tmp_ip != ee_ip) {
+113    Einfg: 			//value ins EEPROM schreiben
+114    Einfg: 			for (uint16_t count = 0; count<4; count++)
+115    Einfg: 			{
+116    Einfg: 				eeprom_busy_wait ();
+117    Einfg: 				eeprom_write_byte((unsigned char *)(count+NTP_IP_EEPROM_STORE)
+118    Einfg: 			}
+119    Einfg: 			NTP_DEBUG(" saved");
+120    Einfg: 		}
+121    Einfg: 	}
+100    Entf: 	unsigned long tmp_ip = (*(unsigned long*)&ntp_server_ip[0]);
+146    Einfg: 		(*(unsigned long*)&ntp_server_ip[0]) = 0L;	// neuen DNS request 
+213    Einfg: 
+214    Einfg: 		// falls während der Sommerzeit zwischen 23h00 und 24h00 die Zei
+215    Einfg: 		if (TM_hh > 23) {
+216    Einfg: 			TM_hh -= 24;
+217    Einfg: 			TM_AddOneDay();
+218    Einfg: 		}
+------------------------
+stack.c
+372 Änderung: 				packet_length = ETH_PACKET_RECEIVE(MTU_SIZE,eth_buffer);
+        In: 				packet_length = ETH_PACKET_RECEIVE(MTU_SIZE,(uint8_t *)eth_buf
+645 Änderung: 			ETH_PACKET_SEND(ARP_REPLY_LEN,eth_buffer);			// ARP Reply sende
+        In: 			ETH_PACKET_SEND(ARP_REPLY_LEN,(uint8_t *)eth_buffer);			// ARP 
+711 Änderung:     ETH_PACKET_SEND(ARP_REQUEST_LEN, buffer);        //send....
+        In:     ETH_PACKET_SEND(ARP_REQUEST_LEN, (uint8_t *)buffer);        //
+773 Änderung:     ETH_PACKET_SEND(ICMP_REPLY_LEN,eth_buffer);
+        In:     ETH_PACKET_SEND(ICMP_REPLY_LEN,(uint8_t *)eth_buffer);
+1021 Änderung: 	ETH_PACKET_SEND(data_length,eth_buffer); //send...
+         In: 	ETH_PACKET_SEND(data_length,(uint8_t *)eth_buffer); //send...
+1250 Änderung: 	ETH_PACKET_SEND(bufferlen,eth_buffer);
+         In: 	ETH_PACKET_SEND(bufferlen,(uint8_t *)eth_buffer);
+
+------------------------
+timer.c
+ 69    Einfg: volatile unsigned int  tmcount = (1000/TIMERBASE);	//!< Zähler um 
+ 80 Änderung: #if USE_SCHEDULER
+        In: #if USE_SCHEDULER || DOXYGEN
+ 99    Entf: void 	TM_AddOneDay(void);      // add one day to actual date
+112 Änderung: 	OCR1A = (F_CPU / 1024) - 1;
+        In: 	// der Compare-Interrupt wird alle 'TIMERBASE' Millisekunden ausg
+113    Einfg: 	OCR1A = (F_CPU / 1024 / 1000 * TIMERBASE)  - 1;
+115    Einfg: 	machineStatus.Timer2_func = NULL;
+116    Einfg: 	machineStatus.Timer3_func = NULL;
+302    Einfg: 
+303    Einfg: 	if (--timerT == 0) {		// Temperaturen messen
+304    Einfg: 		machineStatus.Tlesen = 1;
+305    Einfg: 		timerT = TIME_TEMP;
+306    Einfg: 	}
+307    Einfg: 
+308    Einfg: 
+309    Einfg:     if((time_watchdog++) > WTT)
+310    Einfg:         {
+311    Einfg:         time_watchdog = 0;
+312    Einfg:         stack_init();
+313    Einfg:         }
+314    Einfg: 
+315    Einfg: 	#if USE_NTP
+316    Einfg: 	ntp_timer--;
+317    Einfg: 	#endif //USE_NTP
+318    Einfg: 
+328 Änderung: #if USE_SCHEDULER
+        In: #if USE_SCHEDULER || DOXYGEN
+425    Einfg:  *
+426    Einfg:  * Der Timerinterrupt ist auf TIMERBASE Millisekunden eingestellt.
+427    Einfg:  * Timer3 wird mit diesem Takt runtergezählt. Bei erreichen von Nu
+428    Einfg:  * gesetzt. Dadurch eignet sich Timer3 für Verzögerungszeiten, die
+429    Einfg:  * Warteroutine (delay_ms) zu nutzen. Bei Änderungen an TIMERBASE 
+430    Einfg:  * OCR1A etc. mit sinnvollen Werten geladen werden.
+434    Einfg: 	if ( tmcount-- == 0 ) {
+435    Einfg: 
+436    Einfg: 		// eine Sekunde ist vergangen - Zähler neu setzen
+437    Einfg: 		tmcount = (1000/TIMERBASE);
+438    Einfg: 
+412    Entf: 	if (--timerT == 0) {		// Temperaturen messen
+413    Entf: 		machineStatus.Tlesen = 1;
+414    Entf: 		timerT = TIME_TEMP;
+445    Einfg: 	// Timer3 im TIMERBASE-Takt runterzählen
+446    Einfg: 	if (machineStatus.Timer3) {
+447    Einfg: 			machineStatus.Timer3--;
+448    Einfg: 			if (!machineStatus.Timer3) {	// Zero?
+449    Einfg: 				machineStatus.Time3Elapsed = true;
+450    Einfg: 			}
+451    Einfg: 		}
+418    Entf:     if((time_watchdog++) > WTT)
+419    Entf:         {
+420    Entf:         time_watchdog = 0;
+421    Entf:         stack_init();
+422    Entf:         }
+423    Entf: 	eth.timer = 1;
+424    Entf: 	#if USE_NTP
+425    Entf: 	ntp_timer--;
+426    Entf: 	#endif //USE_NTP
+
+------------------------
+
+
+
+------------------------------------------------------------------------------------------------------
+Unterschiedebericht 1.1.04 -> 1.1.05
+Projekt: $/avr-webserver
+Geändert:
+main.c
+stack.c
+networkcard/enc28j60.h	- komplett ersetzt
+networkcard/enc28j60.c	- komplett ersetzt
+
+------------------------
+main.c
+227    Einfg: 	timer_init();	// Timer starten - von stack_init() hierher verscho
+------------------------
+stack.c
+115    Entf: 	//Timer starten
+116    Entf: 	timer_init();
+117    Entf: 
+141    Entf: #if USE_ENC28J60
+142    Entf: 	ETH_PACKET_SEND(60,eth_buffer);
+143    Entf: 	ETH_PACKET_SEND(60,eth_buffer);
+144    Entf: #endif
+145    Entf: 	
+360 Änderung: 		while( (PINB &(1<<PB2)) == 0)
+        In: 		while(ETH_INT_ACTIVE)
+378 Änderung: 				unsigned int packet_lenght;
+        In: 				unsigned int packet_length;
+380 Änderung: 				packet_lenght = ETH_PACKET_RECEIVE(MTU_SIZE,eth_buffer);
+        In: 				packet_length = ETH_PACKET_RECEIVE(MTU_SIZE,eth_buffer);
+381 Änderung: 				/*Wenn ein Packet angekommen ist, ist packet_lenght =! 0*/
+        In: 				if(packet_length > 0)
+382 Änderung: 				packet_lenght = packet_lenght - 4;
+        In: 				{
+383 Änderung: 				eth_buffer[packet_lenght+1] = 0;
+        In: 					eth_buffer[packet_length+1] = 0;
+377    Einfg: 				}
+------------------------
+timer.h
+ 66    Einfg: 	void TM_AddOneDay(void);      // add one day to actual date
+
+------------------------------------------------------------------------------------------------------
+Unterschiedebericht 1.1.03 -> 1.1.04
+Projekt: $/avr-webserver
+Geändert:
+rc5/rc5.h			- neu
+rc5/rc5.c			- neu
+tcpservice/tcpcmd.c
+tcpservice/tcpcmd.h
+networkcard/enc28j60.h
+config.h
+main.c
+messung.c
+messung.h
+
+------------------------
+tcpservice/tcpcmd.c
+410    Einfg: #if USE_RC5
+411    Einfg: /**
+412    Einfg:  * \ingroup rc5
+413    Einfg:  *	Befehls-Tabelle (in tcpcmd.c)
+414    Einfg:  *
+415    Einfg:  *	Dies ist die Tabelle mit Funktionspointern
+416    Einfg:  *	auf die per IR-Steuerung ausgeführten Kommandos
+417    Einfg:  */
+418    Einfg: cmd_fp RC5_TABLE[] PROGMEM = {
+419    Einfg: 	command_reset,
+420    Einfg: 	command_arp,
+421    Einfg: 	command_tcp,
+422    Einfg: 	command_ip,
+423    Einfg: 	command_time,
+424    Einfg: 	command_ntp_refresh,
+425    Einfg: 		
+426    Einfg: #if USE_OW
+427    Einfg: 	command_OWlookup,
+428    Einfg: 	command_OWread,
+429    Einfg: #endif
+430    Einfg: 
+431    Einfg: #if USE_MMC
+432    Einfg: 	cmd_MMCdir,
+433    Einfg: 	print_disk_info,
+434    Einfg: #endif
+435    Einfg: 
+436    Einfg: #if USE_WOL
+437    Einfg: 	command_wol,
+438    Einfg: #endif
+439    Einfg: 
+440    Einfg: #if USE_CAM
+441    Einfg: 	Bild_speichern,
+442    Einfg: #endif
+443    Einfg: 
+444    Einfg: #if HELPTEXT
+445    Einfg: 	command_help,
+446    Einfg: #endif
+447    Einfg: };
+448    Einfg: uint8_t RC5maxcmd = sizeof(RC5_TABLE)/sizeof(cmd_fp);
+449    Einfg: #endif
+450    Einfg: 
+832 Änderung: 	max_bytes = cam_picture_store(CAM_RESELUTION);      //Kamera läd 
+        In: 	max_bytes = cam_picture_store(CAM_RESOLUTION);      //Kamera läd 
+
+------------------------
+tcpservice/tcpcmd.h
+ 74    Einfg: 	extern cmd_fp RC5_TABLE[];		//!< die Tabelle mit Funktionsaufrufe
+ 75    Einfg: 	extern uint8_t RC5maxcmd;
+
+------------------------
+networkcard/enc28j60.h
+ 42    Einfg:  *	Belegung bei NET-IO (Pollin):
+ 43    Einfg:  *	- PortB Pin4 - (SS) Chip Select für ENC28j60
+ 44    Einfg:  *
+ 53    Einfg: 	#if NET_IO_BOARD
+ 54    Einfg: 	#define ENC28J60_PIN_CS		4
+ 55    Einfg: 	#else
+ 57    Einfg: 	#endif
+
+------------------------
+config.h
+ 40 Änderung: 	//ETH_M32_EX (www.ulrichradig.de)
+        In: 	#define USE_ENC28J60	1	// ETH_M32_EX / Webmodul (www.ulrichradig.
+ 41 Änderung: 	#define USE_ENC28J60	1
+        In: 	#define USE_RTL8019		0	// Holger Buss (www.mikrocontroller.com) M
+ 42 Änderung: 	//Holger Buss (www.mikrocontroller.com) Mega32-Board
+        In: 	#define NET_IO_BOARD	0	// NET_IO_BOARD (Pollin)
+ 43    Entf: 	#define USE_RTL8019		0
+103 Änderung: 	#define USE_SER_LCD		0		//!< LCD Routinen mit einbinden
+        In: 	#define USE_SER_LCD		1		//!< LCD Routinen mit einbinden
+186    Einfg: /** Infrarot Fernbedienung **/
+187    Einfg: 	#define USE_RC5				1
+188    Einfg: 	#define	RC5_DDR				DDRC		//!< IR input port Data Direction Regist
+189    Einfg: 	#define	RC5_INPORT			PINC		//!< IR input port
+190    Einfg: 	#define	RC5_PIN				PC5			//!< \port PC5 - IR input pin
+191    Einfg: 
+202    Einfg: 	// don't touch!
+203    Einfg: 	#if NET_IO_BOARD
+204    Einfg: 		#undef	USE_ENC28J60		// Net_IO läuft mit ENC28J60
+205    Einfg: 		#define USE_ENC28J60	1
+206    Einfg: 
+207    Einfg: 		#undef	USE_MMC				// Net_IO hat keine SD-Karte
+208    Einfg: 		#define USE_MMC			0
+209    Einfg: 	#endif
+210    Einfg: 
+302    Einfg: 	#if USE_RC5
+303    Einfg: 	volatile uint16_t 		lastRC5data;	//!< letzter gültiger RC5 Code
+304    Einfg: 	int8_t					disp_index;		//!< aktueller angezeigter Wert im LCD
+305    Einfg: 	#endif
+
+------------------------
+main.c
+ 82    Einfg: #if USE_RC5
+ 83    Einfg: 	#include "rc5/rc5.h"
+ 84    Einfg: #endif
+ 85    Einfg: 
+283    Einfg: 	#if USE_RC5
+284    Einfg: 	rc5_init();
+285    Einfg: 	#endif
+286    Einfg: 
+422 Änderung: 			if (machineStatus.PINCchanged & 0x80) {
+        In: 			if (machineStatus.PINCchanged & 1<<SENS_PIN1) {
+425 Änderung: 				 * Zustand von PINC7 hat sich geändert<br>
+        In: 				 * Zustand von Sensor1 hat sich geändert<br>
+432 Änderung: 				if ( !(machineStatus.PINCStatus & 0x80) ) {	// falls eingescha
+        In: 				if ( !(machineStatus.PINCStatus & 1<<SENS_PIN1) ) {	// falls e
+437 Änderung: 			if (machineStatus.PINCchanged & 0x40) {
+        In: 			if (machineStatus.PINCchanged & 1<<SENS_PIN2) {
+440 Änderung: 				 * Zustand von PINC6 hat sich geändert<br>
+        In: 				 * Zustand von Sensor2 hat sich geändert<br>
+445 Änderung: 				if ( !(machineStatus.PINCStatus & 0x40) ) {	// falls eingescha
+        In: 				if ( !(machineStatus.PINCStatus & 1<<SENS_PIN2) ) {	// falls e
+449 Änderung: 					logdata("C6 Zeit: %i Sekunden",time - anlagenStatus.Zaehler2)
+        In: 					logdata("Sensor 2 Zeit: %i Sekunden",time - anlagenStatus.Zae
+454 Änderung: 			if (machineStatus.PINCchanged & 0x20) {
+        In: 			if (machineStatus.PINCchanged & 1<<SENS_PIN3) {
+457 Änderung: 				 * Zustand von PINC5 hat sich geändert<br>
+        In: 				 * Zustand von Sensor3 hat sich geändert<br>
+459 Änderung: 				 * in Abhängigkeit von C6 Pulse an C5 zählen
+        In: 				 * in Abhängigkeit von Sensor2 Pulse an Sensor3 zählen
+461 Änderung: 				if ( !(machineStatus.PINCStatus & 0x60) ) {
+        In: 				if ( !(machineStatus.PINCStatus & 1<<SENS_PIN2) ) {
+462 Änderung: 					// nur zählen, wenn C6 eingeschaltet
+        In: 					// nur zählen, wenn Sensor2 eingeschaltet
+467 Änderung: 			if (machineStatus.PINCchanged & 0x10) {
+        In: 			if (machineStatus.PINCchanged & 1<<SENS_PIN4) {
+470 Änderung: 				 * Zustand von PINC4 hat sich geändert<br>
+        In: 				 * Zustand von Sensor4 hat sich geändert<br>
+474 Änderung: 				if ( !(machineStatus.PINCStatus & 0x10) ) {
+        In: 				if ( !(machineStatus.PINCStatus & 1<<SENS_PIN4) ) {
+483    Entf: 			anlagenStatus.relais1 = !(machineStatus.PINCStatus & 0x01);
+484    Entf: 			anlagenStatus.relais2 = !(machineStatus.PINCStatus & 0x02);
+485    Entf: 			anlagenStatus.relais3 = !(machineStatus.PINCStatus & 0x04);
+515    Einfg: 			PORTD ^= (1<<PD6);
+519    Einfg: 		/**
+520    Einfg: 		*	\anchor RC5Beispiel
+521    Einfg: 		*	<H3>Beispiel zur Steuerung mit IR-Fernbedienung (RC5 Code)</H3
+522    Einfg: 		*
+523    Einfg: 		*	Per Fernbedienung lassen sich hier die Temperaturen der 1-Wire
+524    Einfg: 		*	Sensoren auf dem LCD-Display darstellen. Dazu müssen 3 Tasten
+525    Einfg: 		*	in rc5.h mit '#define' definiert werden. (Der gesendete  Code 
+526    Einfg: 		*	eventuell bei den Fernbedienungen unterschiedlich).
+527    Einfg: 		*
+528    Einfg: 		*	Ebenso sind in RC5_TABLE[] einige Funktionen aus der tcpcmd
+529    Einfg: 		*	eingetragen, die sich über einzelne Tasten der Fernbedienung
+530    Einfg: 		*	direkt aufrufen lassen.
+531    Einfg: 		*
+532    Einfg: 		*	Um die gesendeten Codes <tt>seiner</tt> Fernbedienung zu besti
+533    Einfg: 		*	kann man die Auskommentierung der "usart_write"-Befehle aufheb
+534    Einfg: 		*	Die empfangenen Codes werden dann auf der seriellen Schnittste
+535    Einfg: 		*	ausgegeben.
+536    Einfg: 		*/
+537    Einfg: 		#if USE_RC5
+538    Einfg: 	    cli();
+539    Einfg:     	int i = rc5_data;			// read two bytes from interrupt !
+540    Einfg:     	rc5_data = 0;
+541    Einfg:     	sei();
+542    Einfg: 		if( i ){
+543    Einfg: 			if ( i != machineStatus.lastRC5data ) {
+544    Einfg: 				// neuer Tastendruck
+545    Einfg: 				machineStatus.lastRC5data = i;	// letzten Tastendruck speicher
+546    Einfg: 
+547    Einfg: 				uint8_t device = (i >> 6 & 0x1F);
+548    Einfg: 				uint8_t keycode = (i & 0x3F) | (~i >> 7 & 0x40);
+549    Einfg: 
+550    Einfg: 				//usart_write("\r\n%i",( i >> 11 & 1));	// Toggle Bit
+551    Einfg: 				//usart_write(" %i", device);			// Device address
+552    Einfg: 				//usart_write(" %i -",keycode); 		// Key Code
+553    Einfg: 
+554    Einfg: 				if ( keycode == RC5KEY_OW ) {			// Temperatur neu lesen
+555    Einfg: 					lese_Temperatur();
+556    Einfg: 					machineStatus.disp_index = 0;
+557    Einfg: 					#if USE_SER_LCD
+558    Einfg: 					lcd_clear();
+559    Einfg: 					back_light = 1;
+560    Einfg: 					#endif
+561    Einfg: 				}
+562    Einfg: 				else if ( keycode == RC5KEY_UP ) {
+563    Einfg: 					if ( --(machineStatus.disp_index) < 0 )
+564    Einfg: 						machineStatus.disp_index = MAXSENSORS - 1;
+565    Einfg: 				}
+566    Einfg: 				else if ( keycode == RC5KEY_DWN ) {
+567    Einfg: 					if ( ++(machineStatus.disp_index) >= MAXSENSORS )
+568    Einfg: 						machineStatus.disp_index = 0;
+569    Einfg: 				}
+570    Einfg: 
+571    Einfg: 				if ( keycode == RC5KEY_OW || keycode == RC5KEY_UP
+572    Einfg: 										  || keycode == RC5KEY_DWN) {
+573    Einfg: 					#if USE_SER_LCD
+574    Einfg: 					char zeile[20];
+575    Einfg: 
+576    Einfg: 					lcd_print(0,0,"Temp. %2i: ",(machineStatus.disp_index+1));
+577    Einfg: 					dtostrf(ow_array[machineStatus.disp_index] / 10.0,5,1,zeile);
+578    Einfg: 					lcd_print_str(zeile);
+579    Einfg: 					lcd_print_str("C");
+580    Einfg: 					#endif
+581    Einfg: 				}
+582    Einfg: 				else if ( keycode < RC5maxcmd ) {
+583    Einfg: 					argv = 0;	// keine Parameter
+584    Einfg: 					((cmd_fp)pgm_read_word(&RC5_TABLE[keycode]))(0);
+585    Einfg: 				}
+586    Einfg: 				else {
+587    Einfg: 					printf_P(PSTR("\r\nunbekannter RC5 Code: %i / %i\r\n"),device
+588    Einfg: 				}
+589    Einfg: 			}
+590    Einfg: 			else {
+591    Einfg: 				// Taste wird gehalten -> nur Volume, Channel etc. auswerten
+592    Einfg: 				//usart_putchar(( i >> 11 & 1) + '0'), 0);	// Toggle Bit
+593    Einfg: 			}
+594    Einfg: 		}
+595    Einfg: 		#endif
+596    Einfg: 
+
+------------------------
+messung.c
+ 91 Änderung: 	SENS_DDR = (uint8_t)~SENS_ACTIVE_PINS;	// aktive Sensoren auf Ein
+        In: 	SENS_DDR &= ~(SENS_ACTIVE_PINS);		// aktive Sensoren auf Eingang
+ 92 Änderung: 	SENS_PULLUP = SENS_ACTIVE_PINS; 		// Pullups einschalten
+        In: 	SENS_PULLUP |= (SENS_ACTIVE_PINS); 		// Pullups einschalten
+ 93 Änderung: 	SENS_INTMASK = SENS_ACTIVE_PINS;		// auf aktive Eingänge reagiere
+        In: 	SENS_INTMASK |= SENS_ACTIVE_PINS;		// auf aktive Eingänge reagier
+
+------------------------
+messung.h
+ 46 Änderung:  *	- Port C - An/Aus Sensoren an Pin 0, 1, 5, 6 und 7
+        In:  *	- Port C - An/Aus Sensoren an Pin 0, 1, 6 und 7
+ 54 Änderung: #define SENS_ACTIVE_PINS	0xe3	//!< Sensoren an Pin 0, 1, 5, 6 und 
+        In: #define SENS_PIN1			0		//!< Sensor an Pin 0
+ 55    Einfg: #define SENS_PIN2			1		//!< Sensor an Pin 1
+ 56    Einfg: #define SENS_PIN3			6		//!< Sensor an Pin 6
+ 57    Einfg: #define SENS_PIN4			7		//!< Sensor an Pin 7
+ 58    Einfg: #define SENS_ACTIVE_PINS	((1<<SENS_PIN1) | (1<<SENS_PIN2) | (1<<SE
+ 59    Einfg: 
+
+------------------------------------------------------------------------------------------------------
+Unterschiedebericht 1.1.02 -> 1.1.03
+Projekt: $/avr-webserver
+Geändert:
+ntp.c
+sendmail.c
+stack.c
+stack.h
+telnetd.c
+translate.c
+usart.c
+usart.h
+webpage.h
+1-wire/ds18x20.c
+1-wire/onewire.c
+camera/cam.c
+networkcard/enc28j60.c
+networkcard/enc28j60.h
+sdkarte/sd_raw.c
+sdkarte/sdcard.c
+tcpservice/tcpcmd.c
+tcpservice/tcpsrv.c
+tcpservice/tcpsrv.h
+config.h
+dns.c
+http_get.c
+httpd.c
+main.c
+messung.c
+messung.h
+
+------------------------
+ntp.c
+ 53    Entf: #include "usart.h"
+146 Änderung: 	ntp->rx_timestamp = LBBL_ENDIAN_LONG(ntp->rx_timestamp);
+        In: 	ntp->rx_timestamp = HTONL(ntp->rx_timestamp);
+156 Änderung: 		if (yy % 4) {
+        In: 		if ( yy % 4 == 0) {
+------------------------
+sendmail.c
+175 Änderung: 	char *ptr = &eth_buffer[TCP_DATA_START_VAR];
+        In: 	char *ptr = (char *)&eth_buffer[TCP_DATA_START_VAR];
+232 Änderung:                 decode_base64( read_mailparam(PSTR("US"),zeile,80)
+        In:                 decode_base64( (unsigned char *)read_mailparam(PST
+247 Änderung:                 decode_base64( read_mailparam(PSTR("PW"),zeile,80)
+        In:                 decode_base64( (unsigned char *)read_mailparam(PST
+391 Änderung:         tcp_port_open (sm_status.server_ip,LBBL_ENDIAN_INT(SMTP_PO
+        In:         tcp_port_open (sm_status.server_ip,HTONS(SMTP_PORT),HTONS(
+442 Änderung: 	char *ptr = &eth_buffer[TCP_DATA_START_VAR];
+        In: 	char *ptr = (char *)&eth_buffer[TCP_DATA_START_VAR];
+------------------------
+stack.c
+ 47    Einfg: #include <stdio.h>
+ 61    Einfg: #if USE_DNS
+ 62    Einfg: #include "dns.h"
+ 63    Einfg: #endif
+ 64    Einfg: 
+ 77    Entf: 
+ 79 Änderung: 
+        In: char eth_buffer[MTU_SIZE+1];	//!< Empfangs- und Sendepuffer für Ne
+ 80    Entf: unsigned char eth_buffer[MTU_SIZE+1];	//!< Empfangs- und Sendepuff
+ 91    Einfg: PING_STRUCT ping;
+ 92    Einfg: 
+ 93    Einfg: //----------------------------------------------------------------
+ 94    Einfg: //Converts integer variables to network Byte order
+ 95    Einfg: unsigned int htons(unsigned int val)
+ 96    Einfg: {
+ 97    Einfg:   return HTONS(val);
+ 98    Einfg: }
+ 99    Einfg: //----------------------------------------------------------------
+100    Einfg: //Converts integer variables to network Byte order
+101    Einfg: unsigned long htonl(unsigned long val)
+102    Einfg: {
+103    Einfg:   return HTONL(val);
+104    Einfg: }
+123    Einfg:     #if USE_DNS
+124    Einfg:     //DNS-Server IP aus EEPROM auslesen
+125    Einfg:     (*((unsigned long*)&dns_server_ip[0])) = get_eeprom_value(DNS_
+126    Einfg:     #endif
+127    Einfg: 
+115 Änderung: 	usart_write("\n\rNIC init:");
+        In: 	DEBUG("\n\rNIC init:");
+117 Änderung: 	usart_write("READY!\r\n");
+        In: 	DEBUG("READY!\r\n");
+124 Änderung: 	usart_write("My IP: %1i.%1i.%1i.%1i\r\n\r\n",myip[0],myip[1],myip
+        In: 	DEBUG("My IP: %1i.%1i.%1i.%1i\r\n\r\n",myip[0],myip[1],myip[2],my
+135 Änderung: 		//eeprom_busy_wait ();	
+        In: 		eeprom_busy_wait ();	
+309    Einfg: //----------------------------------------------------------------
+310    Einfg: /**
+311    Einfg:  *	\ingroup stack
+312    Einfg:  *	Löscht UDP Anwendung aus der Anwendungsliste
+313    Einfg:  *
+314    Einfg:  */
+315    Einfg: void kill_udp_app (unsigned int port)
+316    Einfg: {
+317    Einfg:     unsigned char i;
+318    Einfg: 
+319    Einfg:     for (i = 0; i < MAX_APP_ENTRY; i++)
+320    Einfg:     {
+321    Einfg:         if ( UDP_PORT_TABLE[i].port == port )
+322    Einfg:         {
+323    Einfg:             UDP_PORT_TABLE[i].port = 0;
+324    Einfg:         }
+325    Einfg:     }
+326    Einfg:     return;
+327    Einfg: }
+328    Einfg: 
+371 Änderung: 	//Pointer auf Ethernet_Header
+        In:     struct Ethernet_Header *ethernet;    //Pointer auf Ethernet_He
+372 Änderung: 	struct Ethernet_Header *ethernet;
+        In:     struct IP_Header       *ip;          //Pointer auf IP_Header
+415    Einfg:     struct TCP_Header      *tcp;         //Pointer auf TCP_Header
+416    Einfg:     struct ICMP_Header     *icmp;        //Pointer auf ICMP_Header
+417    Einfg: 
+374    Entf: 	//Pointer auf IP_Header
+375    Entf: 	struct IP_Header *ip;
+377    Entf: 	//Pointer auf TCP_Header
+378    Entf: 	struct TCP_Header *tcp;
+380    Entf: 	//Pointer auf ICMP_Header
+381    Entf: 	struct ICMP_Header *icmp;
+384 Änderung: 	if(ETHERNET_ARP_DATAGRAMM)
+        In:     if(ethernet->EnetPacketType == HTONS(0x0806) )     //ARP
+386 Änderung: 		//Erzeugt ein ARP Reply Packet
+        In:         arp_reply(); // check arp packet request/reply
+387    Entf: 		arp_reply();
+391 Änderung: 		if(ETHERNET_IP_DATAGRAMM && IF_MYIP)
+        In:         if( ethernet->EnetPacketType == HTONS(0x0800) )  // if IP
+393 Änderung: 			//Refresh des ARP Eintrages
+        In:             if( ip->IP_Destaddr == *((unsigned long*)&myip[0]) )  
+394    Entf: 			arp_entry_add();
+395    Entf: 			//Ist protokoll Byte = 1 dann ist es ein ICMP Packet
+396    Entf: 			if(IP_ICMP_PACKET)
+433    Einfg:                 arp_entry_add();  ///Refresh des ARP Eintrages
+434    Einfg:                 if(ip->IP_Proto == PROT_ICMP)
+435    Einfg:                 {
+400 Änderung: 				case (0x08):
+        In:                         case (8): //Ping reqest
+401 Änderung: 				
+        In:                             icmp_send(ip->IP_Srcaddr,0,0,icmp->ICM
+402    Entf: 					//Echo-Request empfangen, erzeugen eines ICMP Reply Packet (P
+403    Entf: 					icmp_send(ip->IP_Srcaddr,0x00,0x00,icmp->ICMP_SeqNum,icmp->IC
+406 Änderung: 				case (0x00):
+        In:                         case (0): //Ping reply
+407 Änderung: 					//Echo-Reply Packet empfangen, Empfang melden
+        In:                             if ((*((unsigned long*)&ping.ip1[0])) 
+408 Änderung: 					//TODO: Erst Sequenznummer vergleichen?, Zeitmessung?
+        In:                             {
+409 Änderung: 					usart_write("%i",(ip->IP_Srcaddr&0x000000FF));
+        In:                                 ping.result |= 0x01;
+410 Änderung: 					usart_write(".%i",((ip->IP_Srcaddr&0x0000FF00)>>8));
+        In:                             }
+411 Änderung: 					usart_write(".%i",((ip->IP_Srcaddr&0x00FF0000)>>16));
+        In:                             DEBUG("%i",    (ip->IP_Srcaddr&0x00000
+412 Änderung: 					usart_write(".%i",((ip->IP_Srcaddr&0xFF000000)>>24));
+        In:                             DEBUG(".%i",  ((ip->IP_Srcaddr&0x0000F
+413 Änderung: 					usart_write(": PONG!\r\n");
+        In:                             DEBUG(".%i",  ((ip->IP_Srcaddr&0x00FF0
+450    Einfg:                             DEBUG(".%i :",((ip->IP_Srcaddr&0xFF000
+420 Änderung: 				if(IP_TCP_PACKET) tcp_socket_process();
+        In:                     if( ip->IP_Proto == PROT_TCP ) tcp_socket_proc
+421 Änderung: 				if(IP_UDP_PACKET) udp_socket_process();
+        In:                     if( ip->IP_Proto == PROT_UDP ) udp_socket_proc
+459    Einfg:                 }
+460    Einfg:             }
+461    Einfg:             else
+462    Einfg:             if (ip->IP_Destaddr == (unsigned long)0xffffffff ) // 
+463    Einfg:             {
+464    Einfg:                 if( ip->IP_Proto == PROT_UDP ) udp_socket_process(
+480    Einfg: 	struct ARP_Header      *arp;
+481    Einfg: 	struct IP_Header       *ip;
+482    Einfg: 
+438    Entf: 	
+439    Entf: 	struct ARP_Header *arp;
+441    Entf: 	
+442    Entf: 	struct IP_Header *ip;
+448 Änderung: 		if(ETHERNET_ARP_DATAGRAMM)
+        In: 		if( ethernet->EnetPacketType == HTONS(0x0806) ) //If ARP
+457 Änderung: 		if(ETHERNET_IP_DATAGRAMM)
+        In: 		if( ethernet->EnetPacketType == HTONS(0x0800) ) //If IP
+473 Änderung: 			if(ETHERNET_ARP_DATAGRAMM)
+        In: 			if( ethernet->EnetPacketType == HTONS(0x0806) ) //If ARP
+483 Änderung: 			if(ETHERNET_IP_DATAGRAMM)
+        In: 			if( ethernet->EnetPacketType == HTONS(0x0800) ) //If IP
+527 Änderung: void new_eth_header (unsigned char *buffer,unsigned long dest_ip)
+        In: void new_eth_header (char *buffer,unsigned long dest_ip)
+571    Einfg: 	unsigned char b;
+572    Einfg: 	unsigned char a;
+574    Einfg: 
+532 Änderung: 	unsigned char b = arp_entry_search (dest_ip);
+        In: 	b = arp_entry_search (dest_ip);
+533 Änderung: 	
+        In: 	if (b < MAX_ARP_ENTRY) //Eintrag gefunden wenn kleiner max. Eintr
+534    Entf: 	if (b != MAX_ARP_ENTRY) //Eintrag gefunden wenn ungleich
+536 Änderung: 		for(unsigned char a = 0; a < 6; a++)
+        In: 		for(a = 0; a < 6; a++)
+589    Einfg: 
+546 Änderung: 	
+        In: 	for(a = 0; a < 6; a++)
+547    Entf: 	for(unsigned char a = 0; a < 6; a++)
+610    Einfg: 	unsigned char b;
+611    Einfg: 	unsigned char a;
+567    Entf: 	ethernet = (struct Ethernet_Header *)&eth_buffer[ETHER_OFFSET];
+568    Entf: 
+614    Einfg: 
+615    Einfg: 	ethernet = (struct Ethernet_Header *)&eth_buffer[ETHER_OFFSET];
+572    Entf: 	//2 Byte Hardware Typ: Enthält den Code für Ethernet
+573    Entf: 	if(		arp->ARP_HWType == 0x0100 &&
+575 Änderung: 			//2 Byte Protokoll Typ: Enthält den Code für IP
+        In: 	if( arp->ARP_HWType  == HTONS(0x0001)  &&             // Hardware
+576 Änderung: 			arp->ARP_PRType == 0x0008  &&
+        In:     	arp->ARP_PRType  == HTONS(0x0800)  &&             // Protokol
+577 Änderung: 		
+        In:     	arp->ARP_HWLen   == 0x06           &&             // Länge de
+578 Änderung: 			//1Byte Länge der Hardwareadresse:Enthält 6 für 6 Byte MAC Addr
+        In:     	arp->ARP_PRLen   == 0x04           &&             // Länge de
+579 Änderung: 			arp->ARP_HWLen == 0x06 && 
+        In:     	arp->ARP_TIPAddr == *((unsigned long*)&myip[0]))  // Für uns?
+580    Entf: 		
+581    Entf: 			//1Byte Länge der Protokolladresse:Enthält 4 für 4 Byte Adresse
+582    Entf: 			arp->ARP_PRLen == 0x04 &&
+583    Entf: 		
+584    Entf: 			//Ist das ARP Packet für meine IP Addresse bestimmt
+585    Entf: 			//Vergleiche ARP Target IP Adresse mit meiner IP
+586    Entf: 			arp->ARP_TIPAddr == *((unsigned long*)&myip[0]))
+588 Änderung: 		//Operation handelt es sich um eine anfrage
+        In: 		if (arp->ARP_Op == HTONS(0x0001))				  // ARP request?
+589    Entf: 		if (arp->ARP_Op == 0x0100)
+591 Änderung: 			//Rechner Eingetragen wenn noch nicht geschehen?
+        In: 			arp_entry_add();							  // Rechner eintragen wenn noch nicht g
+592    Entf: 			arp_entry_add(); 
+593    Entf: 					
+629    Einfg: 			ethernet->EnetPacketType = HTONS(0x0806);	  // Nutzlast 0x0800=
+596 Änderung: 			ethernet->EnetPacketType = 0x0608; //Nutzlast 0x0800=IP Datagra
+        In: 			b = arp_entry_search (arp->ARP_SIPAddr);
+597 Änderung: 			
+        In: 			if (b < MAX_ARP_ENTRY)						  // Eintrag gefunden wenn kleiner
+598    Entf: 			unsigned char b = arp_entry_search (arp->ARP_SIPAddr);
+599    Entf: 			if (b != MAX_ARP_ENTRY) //Eintrag gefunden wenn ungleich
+601 Änderung: 				for(unsigned char a = 0; a < 6; a++)
+        In: 				for(a = 0; a < 6; a++)
+614 Änderung: 			//ARP operation wird auf 2 gesetzt damit der andere merkt es is
+        In: 			arp->ARP_Op = HTONS(0x0002);						// ARP op=ECHO gesetzt damit 
+615 Änderung: 			arp->ARP_Op = 0x0200;	
+        In: 			arp->ARP_TIPAddr = arp->ARP_SIPAddr;				// ARP Target IP Adress
+616 Änderung: 			//ARP Target IP Adresse wird geschrieben mit ARP Source IP Adre
+        In: 			arp->ARP_SIPAddr = *((unsigned long *)&myip[0]);	// ARP Source 
+617    Entf: 			arp->ARP_TIPAddr = arp->ARP_SIPAddr;
+618    Entf: 			//Meine IP Adresse wird in ARP Source IP Adresse geschrieben
+619    Entf: 			arp->ARP_SIPAddr = *((unsigned long *)&myip[0]);
+622 Änderung: 			//Sendet das erzeugte ARP Packet 
+        In: 			ETH_PACKET_SEND(ARP_REPLY_LEN,eth_buffer);			// ARP Reply sende
+623    Entf: 			ETH_PACKET_SEND(ARP_REPLY_LEN,eth_buffer);
+626 Änderung: 		//es handelt sich um ein REPLY von einem anderen Client
+        In: 
+627 Änderung: 		if (arp->ARP_Op == 0x0200)
+        In:         if ( arp->ARP_Op == HTONS(0x0002) )						// REPLY von eine
+629 Änderung: 			//Rechner Eingetragen wenn noch nicht geschehen?
+        In: 			arp_entry_add();									// Rechner eintragen wenn noch nicht g
+630    Entf: 			arp_entry_add();
+631    Entf: 			
+646 Änderung: 	unsigned char buffer[ARP_REQUEST_LEN];
+        In: 	char buffer[ARP_REQUEST_LEN];
+675    Einfg:     unsigned char index_tmp;
+676    Einfg:     unsigned char count;
+677    Einfg:     unsigned long a;
+681    Einfg:     struct ARP_Header *arp;
+682    Einfg: 
+652    Entf: 
+653    Entf: 	struct ARP_Header *arp;
+669 Änderung: 	//Nutzlast 0x0800=IP Datagramm;0x0806 = ARP
+        In:     ethernet->EnetPacketType = HTONS(0x0806);          // Nutzlast
+670    Entf: 	ethernet->EnetPacketType = 0x0608; 
+674 Änderung: 	//Meine IP Adresse wird in ARP Source IP Adresse geschrieben
+        In:     arp->ARP_SIPAddr = *((unsigned long *)&myip[0]);   // MyIP = A
+675 Änderung: 	arp->ARP_SIPAddr = *((unsigned long *)&myip[0]);
+        In:     arp->ARP_TIPAddr = dest_ip;                         // Dest IP
+677    Entf: 	//Ziel IP wird in Dest IP geschrieben
+678    Entf: 	arp->ARP_TIPAddr = dest_ip; 
+679    Entf: 	
+683 Änderung: 		  arp->ARP_THAddr[count] = 0x00;
+        In: 		  arp->ARP_THAddr[count] = 0;
+686 Änderung: 	arp->ARP_HWType = 0x0100;
+        In:     arp->ARP_HWType = HTONS(0x0001);
+687 Änderung: 	arp->ARP_PRType = 0x0008;
+        In:     arp->ARP_PRType = HTONS(0x0800);
+690 Änderung: 	arp->ARP_Op 	= 0x0100;
+        In:     arp->ARP_Op     = HTONS(0x0001);
+692 Änderung: 	//Nun ist das ARP-Packet fertig zum Senden !!!
+        In:     ETH_PACKET_SEND(ARP_REQUEST_LEN, buffer);        //send....
+693    Entf: 	//Sendet das erzeugte ARP Packet 
+694    Entf: 	ETH_PACKET_SEND(ARP_REQUEST_LEN, buffer);
+696 Änderung: 	for(unsigned char count = 0;count<20;count++)
+        In: 	for(count = 0;count<20;count++)
+698 Änderung: 		unsigned char index_tmp = arp_entry_search(dest_ip_store);
+        In: 		index_tmp = arp_entry_search(dest_ip_store);
+707 Änderung: 		for(unsigned long a=0;a<10000;a++){asm("nop");};
+        In:         for(a=0;a<10000;a++)
+732    Einfg:         {
+733    Einfg:             asm("nop");
+734    Einfg:         }
+724 Änderung: 	//Variablen zur Berechnung der Checksumme
+        In:     unsigned int result16;  //Checksum
+725    Entf: 	unsigned int result16;
+726    Entf: 
+728    Entf: 	ip = (struct IP_Header *)&eth_buffer[IP_OFFSET];
+729    Entf: 
+754    Einfg: 
+755    Einfg:     ip   = (struct IP_Header   *)&eth_buffer[IP_OFFSET];
+738 Änderung: 	
+        In:     icmp->ICMP_Cksum  = 0;
+739 Änderung: 	//Berechnung der ICMP Checksumme
+        In:     ip->IP_Pktlen     = HTONS(0x0054);   // 0x54 = 84 
+740    Entf: 	//Alle Daten im ICMP Header werden addiert checksum wird deshalb
+741    Entf: 	//ersteinmal auf null gesetzt
+742    Entf: 	icmp->ICMP_Cksum = 0x0000;
+743    Entf: 
+744    Entf: 	//Hier wird erstmal der IP Header neu erstellt
+745    Entf: 
+746    Entf: 	ip->IP_Pktlen = 0x5400;                 // 0x54 = 84 
+750 Änderung: 	//Berechnung der ICMP Header lÃ¤nge
+        In:     //Berechnung der ICMP Header länge
+751 Änderung: 	result16 = LBBL_ENDIAN_INT(ip->IP_Pktlen);
+        In:     result16 = htons(ip->IP_Pktlen);
+754 Änderung: 	//pointer wird auf das erste Packet im ICMP Header gesetzt
+        In:     //pointer wird auf das erste Paket im ICMP Header gesetzt
+759 Änderung: 	icmp->ICMP_Cksum = LBBL_ENDIAN_INT(result16);
+        In:     icmp->ICMP_Cksum = htons(result16);
+762    Entf: 
+820 Änderung: void make_ip_header (unsigned char *buffer,unsigned long dest_ip)
+        In: void make_ip_header (char *buffer,unsigned long dest_ip)
+822 Änderung: 
+        In:     unsigned int result16;  //Checksum
+823    Entf: 	//---------------------------------------------------------------
+825    Entf: 	ethernet = (struct Ethernet_Header *)&buffer[ETHER_OFFSET];
+826    Entf: 	new_eth_header (buffer, dest_ip); //Erzeugt ein neuen Ethernethea
+827    Entf: 	ethernet->EnetPacketType = 0x0008; //Nutzlast 0x0800=IP
+829    Entf: 	//---------------------------------------------------------------
+831 Änderung: 	//Variablen zur Berechnung der Checksumme
+        In:     ethernet = (struct Ethernet_Header *)&buffer[ETHER_OFFSET];
+832    Entf: 	unsigned int result16;
+833    Entf: 	
+836 Änderung: 	//don't fragment
+        In:     new_eth_header (buffer, dest_ip);         //Erzeugt einen neue
+837 Änderung: 	ip->IP_Frag_Offset = 0x0040;
+        In:     ethernet->EnetPacketType = HTONS(0x0800); //Nutzlast 0x0800=IP
+839    Entf: 	//max. hops
+840    Entf: 	ip->IP_ttl = 128;
+842 Änderung: 	ip->IP_Id = LBBL_ENDIAN_INT(IP_id_counter);
+        In: 
+851    Einfg:     ip->IP_Frag_Offset = 0x0040;  //don't fragment
+852    Einfg:     ip->IP_ttl         = 128;      //max. hops
+853    Einfg:     ip->IP_Id          = htons(IP_id_counter);
+844 Änderung: 							//meistens also 4 + 4Bit Headergröße 
+        In:     ip->IP_Tos         = 0;
+845    Entf: 	ip->IP_Tos = 0x00;
+846    Entf: 	
+847    Entf: 	//unsigned int	IP_Pktlen;		//16 Bit Komplette Läng des IP Datagra
+848    Entf: 	//unsigned char	IP_Proto;		//Zeigt das höherschichtige Protokoll 
+849    Entf: 									//(TCP, UDP, ICMP)
+850    Entf: 	
+851    Entf: 	//IP Destadresse wird geschrieben mit IP Sourceadresse 
+852    Entf: 	//das packet soll ja zurückgeschickt werden :-)
+855 Änderung: 		
+        In:     ip->IP_Hdr_Cksum   = 0;
+856    Entf: 	//Berechnung der IP Checksumme
+857    Entf: 	//Alle Daten im IP Header werden addiert checksum wird deshalb
+858    Entf: 	//ersteinmal auf null gesetzt
+859    Entf: 	ip->IP_Hdr_Cksum = 0x0000;
+868 Änderung: 	ip->IP_Hdr_Cksum = LBBL_ENDIAN_INT(result16);
+        In:     ip->IP_Hdr_Cksum = htons(result16);
+878 Änderung: void tcp_entry_add (unsigned char *buffer)
+        In: void tcp_entry_add (char *buffer)
+883 Änderung: 	tcp = (struct TCP_Header *)&buffer[TCP_OFFSET];
+        In: 	struct IP_Header *ip;
+885 Änderung: 	struct IP_Header *ip;
+        In: 	tcp = (struct TCP_Header *)&buffer[TCP_OFFSET];
+902 Änderung: 		result32 = LBBL_ENDIAN_INT(ip->IP_Pktlen) - IP_VERS_LEN - ((tcp-
+        In: 		result32 = htons(ip->IP_Pktlen) - IP_VERS_LEN - ((tcp->TCP_Hdrle
+903 Änderung: 		result32 = result32 + LBBL_ENDIAN_LONG(tcp_entry[index].seq_coun
+        In: 		result32 = result32 + htonl(tcp_entry[index].seq_counter);
+904 Änderung: 		tcp_entry[index].seq_counter = LBBL_ENDIAN_LONG(result32);
+        In: 		tcp_entry[index].seq_counter = htonl(result32);
+968 Änderung: 	while (UDP_PORT_TABLE[port_index].port && UDP_PORT_TABLE[port_ind
+        In: 	while (UDP_PORT_TABLE[port_index].port && UDP_PORT_TABLE[port_ind
+997    Entf: 	DEBUG("UDP wird gesendet!\r\n");
+1002    Entf: 	udp = (struct UDP_Header *)&eth_buffer[UDP_OFFSET];
+1003    Entf: 	
+1001    Einfg: 
+1002    Einfg: 	udp = (struct UDP_Header *)&eth_buffer[UDP_OFFSET];
+1007 Änderung: 	udp->udp_SrcPort = LBBL_ENDIAN_INT(src_port);
+         In: 	udp->udp_SrcPort  = htons(src_port);
+1008 Änderung: 	udp->udp_DestPort = LBBL_ENDIAN_INT(dest_port);
+         In: 	udp->udp_DestPort = htons(dest_port);
+1010 Änderung: 	//UDP Packetlänge
+         In: 	data_length     += UDP_HDR_LEN;                //UDP Packetlength
+1011 Änderung: 	data_length = UDP_HDR_LEN + data_length;
+         In: 	udp->udp_Hdrlen = htons(data_length);
+1012 Änderung: 	udp->udp_Hdrlen = LBBL_ENDIAN_INT(data_length);
+         In: 
+1013 Änderung: 	//IP Headerlänge + UDP Headerlänge
+         In: 	data_length     += IP_VERS_LEN;                //IP Headerlänge +
+1014 Änderung: 	data_length = IP_VERS_LEN + data_length;	
+         In: 	ip->IP_Pktlen = htons(data_length);
+1015    Entf: 	//Hier wird erstmal der IP Header neu erstellt
+1016    Entf: 	ip->IP_Pktlen = LBBL_ENDIAN_INT(data_length);
+1021    Entf: 	//Alle Daten im UDP Header werden addiert checksum wird deshalb
+1022    Entf: 	//ersteinmal auf null gesetzt
+1026 Änderung: 	result16 = LBBL_ENDIAN_INT(ip->IP_Pktlen) + 8;
+         In: 	result16 = htons(ip->IP_Pktlen) + 8;
+1032 Änderung: 	udp->udp_Chksum = LBBL_ENDIAN_INT(result16);
+         In: 	udp->udp_Chksum = htons(result16);
+1034 Änderung: 	//Sendet das erzeugte UDP Packet 
+         In: 	ETH_PACKET_SEND(data_length,eth_buffer); //send...
+1035    Entf:     ETH_PACKET_SEND(data_length,eth_buffer);
+1057 Änderung: 	while (TCP_PORT_TABLE[port_index].port && TCP_PORT_TABLE[port_ind
+         In: 	while (TCP_PORT_TABLE[port_index].port && TCP_PORT_TABLE[port_ind
+1086 Änderung: 		result32 = LBBL_ENDIAN_LONG(tcp_entry[index].seq_counter) + 1;
+         In: 		result32 = htonl(tcp_entry[index].seq_counter) + 1;
+1087 Änderung: 		tcp_entry[index].seq_counter = LBBL_ENDIAN_LONG(result32);
+         In: 		tcp_entry[index].seq_counter = htonl(result32);
+1121    Entf: 		tcp_entry_add (eth_buffer);
+1124 Änderung: 			result32 = LBBL_ENDIAN_LONG(tcp_entry[index].seq_counter) + 1;
+         In: 			tcp_entry_add (eth_buffer);//Temporärer Indexplatz	
+1125    Entf: 			tcp_entry[index].seq_counter = LBBL_ENDIAN_LONG(result32);
+1118    Einfg: 			result32 = htonl(tcp_entry[index].seq_counter) + 1;
+1119    Einfg: 			tcp_entry[index].seq_counter = htonl(result32);
+1120    Einfg: 			
+1146 Änderung: 		result32 = LBBL_ENDIAN_LONG(tcp_entry[index].seq_counter) + 1;
+         In: 		result32 = htonl(tcp_entry[index].seq_counter) + 1;
+1147 Änderung: 		tcp_entry[index].seq_counter = LBBL_ENDIAN_LONG(result32);
+         In: 		tcp_entry[index].seq_counter = htonl(result32);
+1154 Änderung: 			tcp_entry[index].status = ACK_FLAG;
+         In: 			tcp_entry[index].status = ACK_FLAG | FIN_FLAG;
+1203    Einfg: 	unsigned int  bufferlen;
+1206    Einfg: 	struct IP_Header  *ip;
+1207    Einfg: 
+1212    Entf: 	
+1213    Entf: 	struct IP_Header *ip;
+1219 Änderung: 	tcp->TCP_Window = LBBL_ENDIAN_INT(MAX_WINDOWS_SIZE);
+         In: 	tcp->TCP_Window    = htons(MAX_WINDOWS_SIZE);
+1222 Änderung: 	DEBUG("TCP SrcPort %4i\r\n", LBBL_ENDIAN_INT(tcp->TCP_SrcPort));
+         In: 	DEBUG("TCP SrcPort %4i\r\n", htons(tcp->TCP_SrcPort));
+1224 Änderung: 	result32 = LBBL_ENDIAN_LONG(tcp_entry[index].seq_counter); 
+         In: 	result32 = htonl(tcp_entry[index].seq_counter); 
+1232    Entf: 
+1242 Änderung: 	tcp->TCP_Acknum =  LBBL_ENDIAN_LONG(result32);
+         In: 	tcp->TCP_Acknum = htonl(result32);
+1245 Änderung: 	//IP Headerlänge + TCP Headerlänge
+         In: 	bufferlen = IP_VERS_LEN + TCP_HDR_LEN + data_length;    //IP Head
+1246 Änderung: 	unsigned int bufferlen = IP_VERS_LEN + TCP_HDR_LEN + data_length;
+         In: 	ip->IP_Pktlen = htons(bufferlen);                      //Hier wir
+1247    Entf: 	//Hier wird erstmal der IP Header neu erstellt
+1248    Entf: 	ip->IP_Pktlen = LBBL_ENDIAN_INT(bufferlen);
+1253    Entf: 	//Alle Daten im TCP Header werden addiert checksum wird deshalb
+1254    Entf: 	//ersteinmal auf null gesetzt
+1258 Änderung: 	result16 = LBBL_ENDIAN_INT(ip->IP_Pktlen) + 8;
+         In: 	result16 = htons(ip->IP_Pktlen) + 8;
+1262 Änderung: 	//Routine berechnet die Checksumme
+         In: 	//Checksum
+1264 Änderung: 	tcp->TCP_Chksum = LBBL_ENDIAN_INT(result16);
+         In: 	tcp->TCP_Chksum = htons(result16);
+1266 Änderung: 	//Sendet das erzeugte TCP Packet 
+         In: 	//Send the TCP packet
+1287    Einfg: 
+1298 Änderung: 	while (TCP_PORT_TABLE[port_index].port && 
+         In: 	while ( (TCP_PORT_TABLE[port_index].port!=(htons(tcp_entry[index]
+1299 Änderung: 			TCP_PORT_TABLE[port_index].port!=(LBBL_ENDIAN_INT(tcp_entry[ind
+         In: 	      (port_index < MAX_APP_ENTRY)                               
+1294    Einfg: 	if (port_index >= MAX_APP_ENTRY) return;
+1304 Änderung: 	//zugehörige Anwendung ausführen (Packet senden wiederholen)
+         In: 	//zugehörige Anwendung ausführen (Senden wiederholen)
+
+------------------------
+stack.h
+ 77 Änderung: #define LBBL_ENDIAN_INT(x)	((x & 0x00FF)<<8)+((x & 0xFF00)>>8)
+        In: // Konvertierung "host to network" byteorder
+ 78 Änderung: #define LBBL_ENDIAN_LONG(x) ((x & 0xFF000000)>>24)+((x & 0x00FF000
+        In: #define HTONS(n) (unsigned int)((((unsigned int) (n)) << 8) | (((u
+ 79    Einfg: #define HTONL(x) ((x & 0xFF000000)>>24)+((x & 0x00FF0000)>>8)+((x 
+ 80    Einfg: 
+111 Änderung: unsigned char eth_buffer[MTU_SIZE+1];
+        In: char eth_buffer[MTU_SIZE+1];
+146    Einfg: typedef struct
+147    Einfg: {
+148    Einfg:     unsigned char ip1[4];
+149    Einfg:     volatile unsigned char no;
+150    Einfg:     volatile unsigned char result;
+151    Einfg: }PING_STRUCT;
+152    Einfg: 
+153    Einfg: extern PING_STRUCT ping;
+156    Einfg: unsigned int  htons(unsigned int val);
+157    Einfg: unsigned long htonl(unsigned long val);
+151 Änderung: void new_eth_header (unsigned char *,unsigned long);
+        In: void new_eth_header (char *,unsigned long);
+158 Änderung: void make_ip_header (unsigned char *,unsigned long);
+        In: void make_ip_header (char *,unsigned long);
+164 Änderung: void tcp_entry_add (unsigned char *);
+        In: void tcp_entry_add (char *);
+189    Einfg: void kill_tcp_app (unsigned int port);
+191    Einfg: void kill_udp_app (unsigned int port);
+
+------------------------
+telnetd.c
+ 45    Einfg: #include <stdio.h>
+165 Änderung: 			if(tcp_entry[index].dest_port == LBBL_ENDIAN_INT(23))
+        In: 			if(tcp_entry[index].dest_port == HTONS(23))
+
+------------------------
+translate.c
+213 Änderung: 					strcpy_P(dest, PSTR("checked"));
+        In: 					//strcpy_P(dest, PSTR("checked"));
+214    Einfg: 					strcpy_P(dest, PSTR("ledon.gif"));
+216 Änderung: 					strcpy_P(dest, PSTR("unchecked"));
+        In: 					//strcpy_P(dest, PSTR("unchecked"));
+218    Einfg: 					strcpy_P(dest, PSTR("ledoff.gif"));
+
+------------------------
+usart.c
+ 42 Änderung:  * \author Ulrich Radig
+        In:  * \author Ulrich Radig & W.Wallucks
+ 54 Änderung: #include <stdarg.h>
+        In: #include <stdio.h>
+ 55 Änderung: #include <ctype.h>
+        In: 
+ 56    Entf: #include <string.h>
+ 57    Entf: #include <avr/io.h>
+ 99 Änderung: void usart_write_char(char c)
+        In: int usart_putchar(char c, FILE *stream)
+121 Änderung:     return;
+        In:     return 0;
+131 Änderung: 	return;
+        In: 	return 0;
+136    Entf: //----------------------------------------------------------------
+137    Entf: /**
+138    Entf:  *	\ingroup usart
+139    Entf:  *	formatierte Ausgabe auf serieller Schnittstelle<br>
+140    Entf:  *	( limitiertes printf() )
+141    Entf:  */
+142    Entf: void usart_write_P (const char *Buffer,...)
+143    Entf: {
+144    Entf: 	va_list ap;
+145    Entf: 	va_start (ap, Buffer);	
+146    Entf: 	
+147    Entf: 	int format_flag;
+148    Entf: 	char str_buffer[14];
+149    Entf: 	char str_null_buffer[10];
+150    Entf: 	char move = 0;
+151    Entf: 	char Base = 0;
+152    Entf: 	int tmp = 0;
+153    Entf: 	char by;
+154    Entf: 	char *ptr;
+155    Entf: 		
+156    Entf: 	//Ausgabe der Zeichen
+157    Entf:     for(;;)
+158    Entf: 	{
+159    Entf: 		by = pgm_read_byte(Buffer++);
+160    Entf: 		if(by==0) break; // end of format string
+161    Entf:             
+162    Entf: 		if (by == '%')
+163    Entf: 		{
+164    Entf:             by = pgm_read_byte(Buffer++);
+165    Entf: 			if (isdigit(by)>0)
+166    Entf: 				{
+167    Entf:                                  
+168    Entf:  				str_null_buffer[0] = by;
+169    Entf: 				str_null_buffer[1] = '\0';
+170    Entf: 				move = atoi(str_null_buffer);
+171    Entf:                 by = pgm_read_byte(Buffer++);
+172    Entf: 				}
+173    Entf: 
+174    Entf: 			switch (by)
+175    Entf: 				{
+176    Entf:                 case 's':
+177    Entf:                     ptr = va_arg(ap,char *);
+178    Entf:                     while(*ptr) { usart_write_char(*ptr++); }
+179    Entf:                     break;
+180    Entf: 				case 'b':
+181    Entf: 					Base = 2;
+182    Entf: 					goto ConversionLoop;
+183    Entf: 				case 'c':
+184    Entf: 					//Int to char
+185    Entf: 					format_flag = va_arg(ap,int);
+186    Entf: 					usart_write_char (format_flag++);
+187    Entf: 					break;
+188    Entf: 				case 'u':
+189    Entf: 					ultoa(va_arg(ap,uint32_t),str_buffer,10);
+190    Entf: 					goto CvLoop2;
+191    Entf: 				case 'l':
+192    Entf: 					ltoa(va_arg(ap,int32_t),str_buffer,10);
+193    Entf: 					goto CvLoop2;
+194    Entf: 				case 'i':
+195    Entf: 					Base = 10;
+196    Entf: 					goto ConversionLoop;
+197    Entf: 				case 'o':
+198    Entf: 					Base = 8;
+199    Entf: 					goto ConversionLoop;
+200    Entf: 				case 'x':
+201    Entf: 					Base = 16;
+202    Entf: 					//****************************
+203    Entf: 					ConversionLoop:
+204    Entf: 					//****************************
+205    Entf: 					itoa(va_arg(ap,int),str_buffer,Base);
+206    Entf: 
+207    Entf: 					CvLoop2:;
+208    Entf: 					int b=0;
+209    Entf: 					while (str_buffer[b++] != 0){};
+210    Entf: 					b--;
+211    Entf: 					if (b<move)
+212    Entf: 						{
+213    Entf: 						move -=b;
+214    Entf: 						for (tmp = 0;tmp<move;tmp++)
+215    Entf: 							{
+216    Entf: 							str_null_buffer[tmp] = '0';
+217    Entf: 							}
+218    Entf: 						//tmp ++;
+219    Entf: 						str_null_buffer[tmp] = '\0';
+220    Entf: 						strcat(str_null_buffer,str_buffer);
+221    Entf: 						strcpy(str_buffer,str_null_buffer);
+222    Entf: 						}
+223    Entf: 					usart_write_str (str_buffer);
+224    Entf: 					move =0;
+225    Entf: 					break;
+226    Entf: 				}
+227    Entf: 			
+228    Entf: 			}	
+229    Entf: 		else
+230    Entf: 		{
+231    Entf: 			usart_write_char ( by );	
+232    Entf: 		}
+233    Entf: 	}
+234    Entf: 	va_end(ap);
+235    Entf: }
+236    Entf: 
+238 Änderung: /**
+        In: int usart_getchar(FILE *stream)
+239    Entf:  *	\ingroup usart
+240    Entf:  * Ausgabe eines Strings
+241    Entf:  */
+242    Entf: void usart_write_str(char *str)
+243    Entf: {
+244    Entf: 	while (*str)
+246 Änderung: 		usart_write_char(*str++);
+        In: 	if (buffercounter > 0) {
+138    Einfg: 		return usart_rx_buffer[0];
+140    Einfg: 	return 0;
+------------------------
+usart.h
+139 Änderung: 	void usart_write_char(char c);
+        In: 	int  usart_putchar(char, FILE *);
+140 Änderung: 	void usart_write_str(char *str);
+        In: 	#define usart_write_char(c)  usart_putchar(c, 0)
+141    Einfg: 	#define usart_write_str(str) puts(str)
+142    Einfg: 	#define usart_write(format, args...)   printf_P(PSTR(format) , ##
+142 Änderung: 	void usart_write_P (const char *Buffer,...);
+        In: 	int usart_getchar(FILE *);
+143    Entf: 	#define usart_write(format, args...)   usart_write_P(PSTR(format)
+------------------------
+webpage.h
+ 35 Änderung:  * \author Ulrich Radig & W.Wallucks
+        In:  *	Javascript und grafische Schaltbuttons von Andy
+ 36    Einfg:  *
+ 37    Einfg:  * \author Ulrich Radig & W.Wallucks & Andy
+ 58    Einfg: 	/*
+ 59    Einfg: 	http://www.ulrichradig.de/site/forum/viewtopic.php?f=27&t=1273
+ 60    Einfg: 	*/
+ 61    Einfg: 	"<script type=\"text/javascript\">\r\n"
+ 62    Einfg:    	"function send(pin) {\r\n"
+ 63    Einfg:    	"var OUT = document.createElement(\"INPUT\");\r\n"
+ 64    Einfg:    	"OUT.type = \"hidden\";\r\n"
+ 65    Einfg:    	"OUT.value = pin;\r\n"
+ 66    Einfg:    	"OUT.name = \"OUT\";\r\n"
+ 67    Einfg:    	"document.getElementById(\"hide\").appendChild(OUT);\r\n"
+ 68    Einfg:    	"var SUB = document.createElement(\"INPUT\");\r\n"
+ 69    Einfg:    	"SUB.type = \"hidden\";\r\n"
+ 70    Einfg:    	"SUB.value = \"x\";\r\n"
+ 71    Einfg:    	"SUB.name = \"SUB\";\r\n"
+ 72    Einfg:    	"document.getElementById(\"hide\").appendChild(SUB);\r\n"
+ 73    Einfg:    	"document.getElementById(\"hide\").submit()\r\n"
+ 74    Einfg:     "}"
+ 75    Einfg: 	"</script>\r\n"
+ 76    Einfg: 
+ 87 Änderung: 	"<form name=\"form1\" method=\"post\" action=\"\">"
+        In: 	"<div style=\"display: none;\"><form method=\"post\" action=\"\" 
+109    Einfg: 
+110    Einfg: 	"<a href=\"javascript:send('A')\"><img src=\"%PORTA0\" border=\"0
+111    Einfg: 	"<a href=\"javascript:send('B')\"><img src=\"%PORTA1\" border=\"0
+112    Einfg: 	"<a href=\"javascript:send('C')\"><img src=\"%PORTA2\" border=\"0
+113    Einfg: 
+114    Einfg: /*	"<form name=\"form1\" method=\"post\" action=\"\">"
+115 Änderung: 
+        In: */
+------------------------
+1-wire/ds18x20.c
+ 46    Einfg: #include <stdio.h>
+------------------------
+1-wire/onewire.c
+ 32    Einfg: #include <stdio.h>
+------------------------
+camera/cam.c
+104 Änderung: 		cam_command_send (0x01,0x01,0x07,0x19,0x13);
+        In: 		cam_command_send (0x01,0x01,0x07,0x09,0x03);
+------------------------
+networkcard/enc28j60.c
+ 50    Einfg: #include <stdio.h>
+194 Änderung: void enc28j60_send_packet(unsigned int len, unsigned char *buffer)
+        In: void enc28j60_send_packet(unsigned int len, char *buffer)
+238 Änderung: unsigned int enc28j60_receive_packet(unsigned int maxlen, unsigned
+        In: unsigned int enc28j60_receive_packet(unsigned int maxlen, char *bu
+347 Änderung: void enc28j60_read_buffer(unsigned char *buffer, unsigned int len)
+        In: void enc28j60_read_buffer(char *buffer, unsigned int len)
+373 Änderung: void enc28j60_write_buffer(unsigned char *buffer, unsigned int len
+        In: void enc28j60_write_buffer(char *buffer, unsigned int len)
+------------------------
+networkcard/enc28j60.h
+199 Änderung: 	unsigned int enc28j60_receive_packet(unsigned int maxlen, unsigne
+        In: 	unsigned int enc28j60_receive_packet(unsigned int maxlen, char *b
+200 Änderung: 	void enc28j60_send_packet(unsigned int len, unsigned char *buffer
+        In: 	void enc28j60_send_packet(unsigned int len, char *buffer);
+204 Änderung: 	void enc28j60_read_buffer(unsigned char *buffer, unsigned int len
+        In: 	void enc28j60_read_buffer(char *buffer, unsigned int len);
+205 Änderung: 	void enc28j60_write_buffer(unsigned char *buffer, unsigned int le
+        In: 	void enc28j60_write_buffer(char *buffer, unsigned int len);
+------------------------
+sdkarte/sd_raw.c
+219 Änderung:         response = sd_raw_send_command_r1(CMD_SEND_OP_COND, 0);
+        In: 		// ACMD41 für "dünne" und "normale" SD-Karten (wil)
+220    Einfg:         response = sd_raw_send_command_r1(55, 0);	// APP_CMD
+221    Einfg:         response = sd_raw_send_command_r1(41, 0);	// SD_SEND_OP_CO
+------------------------
+sdkarte/sdcard.c
+ 24    Einfg: #include <stdio.h>
+ 31    Einfg: 
+ 32    Einfg: #if USE_MMC
+325 Änderung:  *  vereinfachtes printf um in Datei zu schreiben
+        In:  *  printf um in Datei zu schreiben
+329    Einfg:  *	\attention der Puffer für den formatierten String hat nur 64 ch
+332    Entf: 	va_start (ap, format);	
+334 Änderung: 	int format_flag;
+        In: 	char outbuffer[64];
+335 Änderung: 	char str_buffer[10];
+        In: 	uint8_t nchar = 0;
+336    Entf: 	char str_null_buffer[10];
+337    Entf: 	char move = 0;
+338    Entf: 	char Base = 0;
+339    Entf: 	int tmp = 0;
+340    Entf: 	unsigned char by;
+341    Entf: 	unsigned char *ptr;
+342    Entf: 	unsigned char outbuffer[64];
+343    Entf: 	uint8_t outpos = 0;
+345 Änderung: 	//Ausgabe der Zeichen
+        In: 	va_start (ap, format);
+346 Änderung:     for(;;)
+        In: 	nchar = vsprintf_P(outbuffer, format, ap);
+347 Änderung: 	{
+        In: 	fat16_write_file(stream, (unsigned char *)outbuffer, nchar);
+348    Entf: 		by = pgm_read_byte(format++);
+349    Entf: 		if(by==0) break; // end of format string
+350    Entf:             
+351    Entf: 		if (by == '%')
+352    Entf: 		{
+353    Entf:             by = pgm_read_byte(format++);
+354    Entf: 			if (isdigit(by)>0)
+355    Entf: 				{
+356    Entf:                                  
+357    Entf:  				str_null_buffer[0] = by;
+358    Entf: 				str_null_buffer[1] = '\0';
+359    Entf: 				move = atoi(str_null_buffer);
+360    Entf:                 by = pgm_read_byte(format++);
+361    Entf: 				}
+362    Entf: 
+363    Entf: 			switch (by)
+364    Entf: 				{
+365    Entf:                 case 's':
+366    Entf:                     ptr = va_arg(ap,unsigned char *);
+367    Entf:                     while(*ptr) {
+368    Entf: 						if (outpos >= 64) {
+369    Entf: 							fat16_write_file(stream, outbuffer, outpos);
+370    Entf: 							outpos=0;
+371    Entf: 						}
+372    Entf: 						outbuffer[outpos++] = *ptr++;
+373    Entf: 					}
+374    Entf:                     break;
+375    Entf: 				case 'b':
+376    Entf: 					Base = 2;
+377    Entf: 					goto ConversionLoop;
+378    Entf: 				case 'c':
+379    Entf: 					//Int to char
+380    Entf: 					format_flag = va_arg(ap,int);
+381    Entf: 					outbuffer[outpos++] = format_flag++;
+382    Entf: 					break;
+383    Entf: 				case 'l':
+384    Entf: 					ltoa(va_arg(ap,int32_t),str_buffer,10);
+385    Entf: 					goto CvLoop2;
+386    Entf: 				case 'u':
+387    Entf: 					utoa(va_arg(ap,uint16_t),str_buffer,10);
+388    Entf: 					goto CvLoop2;
+389    Entf: 				case 'i':
+390    Entf: 					Base = 10;
+391    Entf: 					goto ConversionLoop;
+392    Entf: 				case 'o':
+393    Entf: 					Base = 8;
+394    Entf: 					goto ConversionLoop;
+395    Entf: 				case 'x':
+396    Entf: 					Base = 16;
+397    Entf: 					//****************************
+398    Entf: 					ConversionLoop:
+399    Entf: 					//****************************
+400    Entf: 					itoa(va_arg(ap,int),str_buffer,Base);
+401    Entf: 
+402    Entf: 					CvLoop2:;
+403    Entf: 					int b=0;
+404    Entf: 					while (str_buffer[b++] != 0){};
+405    Entf: 					b--;
+406    Entf: 					if (b<move)
+407    Entf: 						{
+408    Entf: 						move -=b;
+409    Entf: 						for (tmp = 0;tmp<move;tmp++)
+410    Entf: 							{
+411    Entf: 							str_null_buffer[tmp] = '0';
+412    Entf: 							}
+413    Entf: 						//tmp ++;
+414    Entf: 						str_null_buffer[tmp] = '\0';
+415    Entf: 						strcat(str_null_buffer,str_buffer);
+416    Entf: 						strcpy(str_buffer,str_null_buffer);
+417    Entf: 						}
+418    Entf: 					//usart_write_str (str_buffer);
+419    Entf: 					// Puffer leeren, falls wenig Platz
+420    Entf: 					if (outpos >= 54) {
+421    Entf: 						fat16_write_file(stream, outbuffer, outpos);
+422    Entf: 						outpos=0;
+423    Entf: 						}
+424    Entf: 
+425    Entf: 					b=0;
+426    Entf: 					while (str_buffer[b] != 0) {
+427    Entf: 						outbuffer[outpos++] = str_buffer[b++];
+428    Entf: 					}
+429    Entf: 					move = 0;
+430    Entf: 					break;
+431    Entf: 				}
+432    Entf: 			
+433    Entf: 			}	
+434    Entf: 		else
+435    Entf: 		{
+436    Entf: 			outbuffer[outpos++] = by;	
+437    Entf: 		}
+438    Entf: 
+439    Entf: 		// Puffer leeren
+440    Entf: 		if (outpos >= 64) {
+441    Entf: 			fat16_write_file(stream, outbuffer, 64);
+442    Entf: 			outpos=0;
+443    Entf: 		}
+444    Entf: 	}
+445    Entf: 
+446    Entf: 	fat16_write_file(stream, outbuffer, outpos);	// letzten Rest raus448 Änderung: 	return 0;
+        In: 	return nchar;
+409    Einfg: #endif	// USE_MMC
+------------------------
+tcpservice/tcpcmd.c
+ 37    Entf: #if TCP_SERVICE
+ 38    Entf: 
+ 43    Einfg: 
+ 44    Einfg: #if USE_MMC
+ 49    Einfg: #endif
+ 50    Einfg: 
+ 51    Einfg: #if TCP_SERVICE
+ 53    Einfg: #endif
+171    Einfg: #if TCP_SERVICE
+173    Einfg: #endif
+183    Einfg: int16_t cmd_quit(char *);
+218    Einfg: int16_t cmd_200(char *);
+219    Einfg: int16_t cmd_250(char *);
+220    Einfg: int16_t cmd_502(char *);
+221    Einfg: int16_t cmd_550(char *);
+222    Einfg: 
+218    Entf: int16_t cmd_200(char *);
+220    Entf: int16_t cmd_250(char *);
+232    Einfg: int16_t cmd_530(char *);
+223    Entf: int16_t cmd_502(char *);
+224    Entf: int16_t cmd_530(char *);
+225    Entf: int16_t cmd_550(char *);
+233    Entf: int16_t cmd_quit(char *);
+715 Änderung: 		usart_write(" SRC_PORT:%4i",LBBL_ENDIAN_INT(tcp_entry[index].src
+        In: 		usart_write(" SRC_PORT:%4i",HTONS(tcp_entry[index].src_port));
+716 Änderung: 		usart_write(" DEST_PORT:%4i",LBBL_ENDIAN_INT(tcp_entry[index].de
+        In: 		usart_write(" DEST_PORT:%4i",HTONS(tcp_entry[index].dest_port));
+830    Einfg: 	char fname[13];
+827 Änderung: 	sprintf_P(outbuffer,PSTR("250 Datei: %02i%02i%02i%02i.jpg"),TM_DD
+        In: 	sprintf_P(fname,PSTR("%02i%02i%02i%02i.jpg"),TM_DD,TM_hh,TM_mm,TM
+828 Änderung: 	File *picfile = f16_open(outbuffer+11,"a");	// Dateiname beginnt 
+        In: 	File *picfile = f16_open(fname,"a");
+829    Entf: 
+852    Einfg: 
+853    Einfg: 		if (outbuffer) {
+854    Einfg: 			sprintf_P(outbuffer,PSTR("250 Datei: %s"),fname);
+858    Einfg: 			return 0;
+859    Einfg: 	}
+860    Einfg: 	else
+1031    Einfg: 	#if TCP_SERVICE
+1033    Einfg: 	#endif
+1054    Einfg: 			#if TCP_SERVICE
+1098    Einfg: 			#endif
+1111    Einfg: 	#if TCP_SERVICE
+1114    Einfg: 	#endif
+1119    Einfg: #endif
+1101    Entf: #endif
+1160    Einfg: 		#if TCP_SERVICE
+1173    Einfg: 		#endif
+1189    Einfg: 	  #if TCP_SERVICE
+1199    Einfg: 	  #else
+1200    Einfg: 		return cmd_502(outbuffer);
+1201    Einfg: 	  #endif
+1216    Einfg: 	  #if TCP_SERVICE
+1232    Einfg: 	  #else
+1233    Einfg: 		return cmd_502(outbuffer);
+1234    Einfg: 	  #endif
+1248    Einfg: #if USE_MMC
+1259    Einfg: #endif
+1260    Einfg: 
+1274    Einfg: #if USE_MMC
+1283    Einfg: #endif
+1298    Einfg: #if !USE_MMC
+1299    Einfg: 	return cmd_502(outbuffer);
+1300    Einfg: #else
+1313    Einfg: #endif
+1328    Einfg: #if !USE_MMC
+1329    Einfg: 	return cmd_502(outbuffer);
+1330    Einfg: #else
+1410    Einfg: #endif
+1422    Einfg: #if !USE_MMC
+1423    Einfg: 	return cmd_502(outbuffer);
+1424    Einfg: #else
+1463    Einfg: #endif
+1427 Änderung:  * auch 8-biitig abläuft. Also kein Grund für Konvertierungen.
+         In:  * auch 8-bitig abläuft. Also kein Grund für Konvertierungen.
+1477    Einfg: #if !TCP_SERVICE
+1478    Einfg: 	return cmd_502(outbuffer);
+1479    Einfg: #else
+1494    Einfg: #endif
+1572    Einfg: 	  #if !TCP_SERVICE
+1573    Einfg: 		return cmd_502(outbuffer);
+1574    Einfg: 	  #else
+1580    Einfg: 	  #endif
+1843    Einfg: #if !USE_MMC
+1844    Einfg: 	return cmd_502(outbuffer);
+1845    Einfg: #else
+1871    Einfg: #endif
+1815    Entf: 
+1816    Entf: #endif
+------------------------
+tcpservice/tcpsrv.c
+ 25    Einfg: #include <stdio.h>
+322 Änderung: 		i = fat16_read_file(tcpsrv_status.datafile, &eth_buffer[TCP_DATA
+        In: 		i = fat16_read_file(tcpsrv_status.datafile, (unsigned char *)&et
+467 Änderung: 				fat16_write_file(tcpsrv_status.datafile, &eth_buffer[TCP_DATA_
+        In: 				fat16_write_file(tcpsrv_status.datafile, (unsigned char *)&eth
+
+------------------------
+tcpservice/tcpsrv.h
+ 48    Einfg: 		#if USE_MMC
+ 53    Einfg: 		#endif
+------------------------
+config.h
+ 64 Änderung: 	#define ROUTER_IP	IP(192,168,0,1)		//!< default IP des Routers/Ga
+        In: 	#define ROUTER_IP	IP(192,168,0,200)		//!< default IP des Routers/
+ 67 Änderung: 	#define USE_DNS		1					//!< mit/ohne DNS-Client
+        In: 	#define USE_DNS		0					//!< mit/ohne DNS-Client
+ 68 Änderung: 	#define DNS_IP		IP(192,168,0,1)		//!< IP des DNS-Servers
+        In: 	#define DNS_IP		IP(192,168,0,200)		//!< IP des DNS-Servers
+103 Änderung: 	#define USE_SER_LCD		1		//!< LCD Routinen mit einbinden
+        In: 	#define USE_SER_LCD		0		//!< LCD Routinen mit einbinden
+107 Änderung: 	#define USE_ADC			1		//!< AD-Wandler benutzen?
+        In: 	#define USE_ADC			0		//!< AD-Wandler benutzen?
+137 Änderung: 	#define CAM_RESELUTION	0
+        In: 	#define CAM_RESOLUTION	1
+140    Einfg: 	// USE_MMC ist Voraussetzung für
+141    Einfg: 	// - TCP_SERVICE	FTP ohne Dateisystem ist nicht sinnvoll ;-)
+142    Einfg: 	// - E_Mail			Mailtexte werden von Karte gelesen
+143    Einfg: 	// - Scheduler		Konfiguration der Schaltzeiten auf SD-Karte
+144    Einfg: 	// - Logdatei		8-))
+145    Einfg: 	//
+148 Änderung: 	#define FTP_ANONYMOUS	1		//!< anomymen Login (ohne User/Kennwort)
+        In: 	#define FTP_ANONYMOUS	1		//!< anonymen Login (ohne User/Kennwort)
+153    Entf: 	#if TCP_SERVICE
+154    Entf: 		#define _CMD_H_
+155    Entf: 	#else
+156    Entf: 		#define _TCPCMD_H_
+157    Entf: 	#endif
+173 Änderung: 	// don't touch! -- Mail benötigt DNS-Auflösung
+        In: 	// don't touch! -- Mail benötigt DNS-Auflösung und die SD-Karte
+196    Einfg: /*------------------------------------*/
+197    Einfg: 	// don't touch! -- siehe oben unter SD-Karte
+198    Einfg: 	#if !USE_MMC
+199    Einfg: 		#undef  TCP_SERVICE
+200    Einfg: 		#define TCP_SERVICE 	0
+201    Einfg: 
+202    Einfg: 		#undef  USE_MAIL
+203    Einfg: 		#define USE_MAIL 		0
+204    Einfg: 
+205    Einfg: 		#undef  USE_SCHEDULER
+206    Einfg: 		#define USE_SCHEDULER	0
+207    Einfg: 
+208    Einfg: 		#undef  USE_LOGDATEI
+209    Einfg: 		#define USE_LOGDATEI	0
+210    Einfg: 
+211    Einfg: 		#undef	USE_DNS
+212    Einfg: 		#define USE_DNS			0
+213    Einfg: 	#endif
+214    Einfg: 
+215    Einfg: 	//#if TCP_SERVICE
+216    Einfg: 		#define _CMD_H_
+217    Einfg: 	//#else
+218    Einfg: 	//	#define _TCPCMD_H_
+219    Einfg: 	//#endif
+220    Einfg: 
+286    Einfg: 	volatile uint8_t 		Timer1;			//!< Countdown Timer #1
+287    Einfg: 	volatile uint8_t 		Timer2;			//!< Countdown Timer #2
+328    Einfg: #if USE_MMC
+330    Einfg: #endif
+
+------------------------
+dns.c
+272 Änderung: 		uint8_t *ptr = &eth_buffer[UDP_DATA_START+DNS_HEADER_LEN];
+        In: 		char *ptr = &eth_buffer[UDP_DATA_START+DNS_HEADER_LEN];
+323 Änderung: 	unsigned char *ptr = &eth_buffer[UDP_DATA_START + DNS_HEADER_LEN]
+        In: 	char *ptr = &eth_buffer[UDP_DATA_START + DNS_HEADER_LEN];
+367 Änderung: 			unsigned char *host = ptr;
+        In: 			char *host = ptr;
+------------------------
+http_get.c
+ 25    Einfg: #include <stdio.h>
+ 74 Änderung:             tcp_port_open (WEATHER_SERVER_IP,LBBL_ENDIAN_INT(80),L
+        In:             tcp_port_open (WEATHER_SERVER_IP,HTONS(80),htons(my_ht
+ 79 Änderung:                 index = tcp_entry_search (WEATHER_SERVER_IP,LBBL_E
+        In:                 index = tcp_entry_search (WEATHER_SERVER_IP,HTONS(
+100 Änderung:         index = tcp_entry_search (WEATHER_SERVER_IP,LBBL_ENDIAN_IN
+        In:         index = tcp_entry_search (WEATHER_SERVER_IP,HTONS(80));
+------------------------
+httpd.c
+ 51    Einfg: #if USE_MMC
+ 54    Einfg: #endif
+152 Änderung: 	//war das HTML Packet fertig, oder müssen weitere Daten gesendet 
+        In: 	//war das HTML Paket fertig, oder müssen weitere Daten gesendet w
+212 Änderung: 	//finden der Authorization und das Ende im Header auch über mehre
+        In: 	//finden der Authorization und das Ende im Header auch über mehre
+246 Änderung: 	//Einzelne Postpacket (z.B. bei firefox)
+        In: 	//Einzelnes Postpaket (z.B. bei firefox)
+251    Einfg: 		PORT_tmp = PORTA;	// aktuellen Status einlesen
+252    Einfg: 
+261 Änderung: 					  PORT_tmp = PORT_tmp + 1;
+        In: 					  PORT_tmp ^= (1<<0);	// toggle
+265 Änderung: 					  PORT_tmp = PORT_tmp + 2;
+        In: 					  PORT_tmp |= (1<<1);	// setzt Ausgang
+269 Änderung: 					  PORT_tmp = PORT_tmp + 4;
+        In: 					  PORT_tmp |= (1<<2);			// setzt Ausgang
+274    Einfg: 					  machineStatus.Timer1 = 20;	// und timer, der in mainloop ru
+283 Änderung: 					** Zum zurücksetzen muss ein weiteres Zeichen verwendet werde
+        In: 					**
+289    Einfg: 					** es gibt unterschiedliche Möglichkeiten einen Port zu setze
+290    Einfg: 					**	- Befehl setzt oder löscht den Ausgang
+291    Einfg: 					**	- der Ausgang wird bei jedem Befehl umgeschaltet
+292    Einfg: 					**	- der Befehl schaltet den Port, der über einen Timer wiede
+338 Änderung: 		unsigned char *_ptmp = &eth_buffer[TCP_DATA_START_VAR + 5 + http
+        In: 		char *_ptmp = &eth_buffer[TCP_DATA_START_VAR + 5 + http_entry[in
+496 Änderung:  *	Daten Packete an Client schicken
+        In:  *	Daten Pakete an Client schicken
+518 Änderung: 			max_bytes = cam_picture_store(CAM_RESELUTION);
+        In: 			max_bytes = cam_picture_store(CAM_RESOLUTION);
+642 Änderung: 			char *src = http_entry[index].new_page_pointer;
+        In: 			PGM_P src = http_entry[index].new_page_pointer;
+------------------------
+main.c
+ 26    Einfg: #include <stdio.h>
+179    Einfg: #if USE_MMC
+181    Einfg: #endif
+193    Einfg: FILE usart_out = FDEV_SETUP_STREAM(usart_putchar, NULL, _FDEV_SETU
+194    Einfg: 
+205 Änderung:     usart_init(BAUDRATE); // setup the UART
+        In:     usart_init(BAUDRATE); 	// setup the USART
+211    Einfg: 	stdout = &usart_out;	// set standard lib-functions
+211 Änderung: 	usart_write("\n\rSystem Ready\n\r");
+        In: 	printf_P(PSTR("\n\rSystem Ready\n\r"));
+212 Änderung:     usart_write("Compiliert am "__DATE__" um "__TIME__"\r\n");
+        In:     printf_P(PSTR("Compiliert am "__DATE__" um "__TIME__"\r\n"));
+213 Änderung:     usart_write("Compiliert mit GCC Version "__VERSION__"\r\n");
+        In:     printf_P(PSTR("Compiliert mit GCC Version "__VERSION__"\r\n"))
+241 Änderung: 	max_bytes = cam_picture_store(CAM_RESELUTION);
+        In: 	max_bytes = cam_picture_store(CAM_RESOLUTION);
+317    Einfg: 
+318    Einfg: 			// Countdown-Timer bei Bedarf runterzählen
+319    Einfg: 			if (machineStatus.Timer1) {
+320    Einfg: 				machineStatus.Timer1--;
+321    Einfg: 				if (!machineStatus.Timer1) {	// Zero?
+322    Einfg: 					// bei Zero (0) Flag für Aktion setzen
+323    Einfg: 					// oder sofort ausführen
+324    Einfg: 					PORTA &= ~(1<<2);	// Pin 2 resetten
+325    Einfg: 				}
+326    Einfg: 			}
+327    Einfg: 
+328    Einfg: 			// ... und der nächste Countdown
+329    Einfg: 			if (machineStatus.Timer2) {
+330    Einfg: 				machineStatus.Timer2--;
+331    Einfg: 				if (!machineStatus.Timer2) {	// Zero?
+332    Einfg: 					// tu was ...
+333    Einfg: 				}
+334    Einfg: 			}
+------------------------
+messung.c
+ 41    Einfg: 
+ 42    Einfg: #if USE_MMC
+ 45    Einfg: #endif
+ 88 Änderung: 	SENS_DDR = ~SENS_ACTIVE_PINS;			// aktive Sensoren auf Eingang
+        In: 	SENS_DDR = (uint8_t)~SENS_ACTIVE_PINS;	// aktive Sensoren auf Ein
+392    Einfg: 	#if USE_LOGDATEI
+395    Entf: 	#if USE_LOGDATEI
+------------------------
+messung.h
+ 66 Änderung: #define S1An()	OUT_PORT |= (1<<PORT_SCHALTER1)
+        In: #define S1An()		OUT_PORT |= (1<<PORT_SCHALTER1)		//!< Port high sc
+ 67 Änderung: #define S1Aus()	OUT_PORT &= ~(1<<PORT_SCHALTER1)
+        In: #define S1Aus()		OUT_PORT &= ~(1<<PORT_SCHALTER1)	//!< Port low  s
+ 68    Einfg: #define S1Toggle()	OUT_PORT ^= (1<<PORT_SCHALTER1)		//!< Port umsc
+ 71    Einfg: #define S2Toggle()	OUT_PORT ^= (1<<PORT_SCHALTER2)
+ 74    Einfg: #define S3Toggle()	OUT_PORT ^= (1<<PORT_SCHALTER3)
+------------------------------------------------------------------------------------------------------
+Unterschiedebericht 1.1.01 -> 1.1.02
+Projekt: $/avr-webserver
+
+- LCD getestet und eingebunden
+- neuer Befehl in tcpcmd: Bild (speichert Kamerabild auf SD-Karte)
+- Option für externe Spannungsversorgung der DS18x20 in config.h
+- cam.h/.c aus 0.93 übernommen (mit getrenntem USART1)
+- Kommentare ergänzt
+
+Geändert:
+   config.h
+   Doxyfile
+   lcd.c
+   lcd.h
+   main.c
+   messung.c
+   messung.h
+   webpage.h
+   1-wire/onewire.h
+   camera/cam.c
+   camera/cam.h
+   camera/servo.c
+   camera/servo.h
+   networkcard/enc28j60.h
+   sdkarte/sd_raw.c
+   sdkarte/sd_raw_config.h
+   sdkarte/sdcard.c
+   tcpservice/tcpcmd.c
+
+------------------------
+  config.h
+  6 Änderung:  Version:        25.10.2008
+        In:  Version:        16.11.2008
+ 26 Änderung:  * \addtogroup main	Hauptprogramm
+        In:  * \ingroup main	Hauptprogramm
+ 28    Entf:  * @{
+ 38    Entf: /**
+ 39    Entf:  * @}
+ 40    Entf:  */
+ 58 Änderung: 	//Umrechnung von IP zu unsigned long
+        In: 	//! Umrechnung von IP zu unsigned long
+ 62 Änderung: 	#define MYIP		IP(192,168,0,99)
+        In: 	#define MYIP		IP(192,168,0,99)	//!< default IP des Webservers
+ 65 Änderung: 	#define NETMASK		IP(255,255,255,0)
+        In: 	#define NETMASK		IP(255,255,255,0)	//!< default Netzwerkmaske
+ 68 Änderung: 	#define ROUTER_IP	IP(192,168,0,1)	//!< IP des Routers/Gateway
+        In: 	#define ROUTER_IP	IP(192,168,0,1)		//!< default IP des Routers/Ga
+ 74 Änderung: 	//IP des NTP-Servers z.B. Server 1.de.pool.ntp.org
+        In: 	//NTP Einstellen der Zeit mittels NTP
+ 75 Änderung: 	#define USE_NTP		1 //1 = NTP Client on
+        In: 	#define USE_NTP		1 					//!< 1 = NTP Client on
+ 76 Änderung: 	#define NTP_IP		IP(77,37,6,59)
+        In: 	#define NTP_IP		IP(77,37,6,59)		//!< IP des NTP-Servers z.B. Serv
+ 79 Änderung: 	#define USE_WOL			0 //1 = WOL on
+        In: 	#define USE_WOL			0 				//!< 1 = WOL on
+ 83 Änderung: 	//MAC Adresse des Webservers	
+        In: 	//! MAC Adresse des Webservers	
+ 93    Einfg: 	// dies hat nichts mit dem Prozessortakt zu tun!
+106 Änderung: 	#define USE_SER_LCD		0		//!< LCD Routinen mit einbinden
+        In: 	#define USE_SER_LCD		1		//!< LCD Routinen mit einbinden
+115    Einfg: 	#define OW_EXTERN_POWERED 0		//!< falls der 1-Wire bus eine exter
+172 Änderung:     #define USE_MAIL			1
+        In:     #define USE_MAIL			1			//!< sendmail verwenden
+182 Änderung:     //Empfang von Wetterdaten auf der Console (über HTTP_GET)
+        In:     //! Empfang von Wetterdaten auf der Console (über HTTP_GET)
+307    Einfg: /*
+308    Einfg:  */
+
+------------------------
+  doxyfile
+  8 Änderung: PROJECT_NUMBER         = 1.1.01
+        In: PROJECT_NUMBER         = 1.1.02
+ 37 Änderung: ALIASES                = 
+        In: ALIASES                = ALIASES \
+ 38    Einfg:                          += \
+ 39    Einfg:                          "port=\xrefitem usedports \"Hardware Port
+244 Änderung: MACRO_EXPANSION        = NO
+        In: MACRO_EXPANSION        = YES
+249 Änderung: PREDEFINED             = 
+        In: PREDEFINED             = DOXYGEN:=1
+
+------------------------
+  lcd.c
+ 33    Einfg: #include "config.h"
+ 34    Einfg: 
+ 35    Einfg: #if USE_SER_LCD || DOXYGEN
+ 36    Einfg: 
+ 37    Einfg: #include <stdlib.h>
+ 38    Einfg: #include <stdarg.h>
+ 39    Einfg: #include <ctype.h>
+ 40    Einfg: #include <string.h>
+ 41    Einfg: #include <avr/io.h>
+ 42    Einfg: #include <avr/pgmspace.h>
+ 36 Änderung: #if USE_SER_LCD
+        In: /**
+ 37 Änderung: 
+        In:  * \ingroup lcd
+ 38 Änderung: //const char LINE_ADDRESS[] ={0x80,0xC0,0x90,0xD0}; //2 x 16;4 x 1
+        In:  *
+ 39 Änderung: const char LINE_ADDRESS[] ={0x80,0xC0,0x94,0xD4}; //4 mal 20
+        In:  * Einstellung der Zeilenadresse für n mal 16 oder n mal 20 Charac
+ 50    Einfg:  *
+ 51    Einfg:  */
+ 52    Einfg: const char LINE_ADDRESS[] ={0x80,0xC0,0x90,0xD0}; //2 x 16;4 x 16 
+ 53    Einfg: //const char LINE_ADDRESS[] ={0x80,0xC0,0x94,0xD4}; //4 mal 20
+------------------------
+  lcd.h
+ 30    Entf: #include "config.h"
+ 32 Änderung: #if USE_SER_LCD
+        In: #if USE_SER_LCD || DOXYGEN
+ 36    Entf:  #include <stdlib.h>
+ 37    Entf:  #include <stdarg.h>
+ 38    Entf:  #include <ctype.h>
+ 39    Entf:  #include <string.h>
+ 40    Entf:  #include <avr/io.h>
+ 41    Entf:  #include <avr/pgmspace.h>
+ 42    Entf:  
+ 57 Änderung:  volatile unsigned char back_light;
+        In:  extern volatile unsigned char back_light;
+ 61 Änderung:  //#define TWO_LINES     
+        In:  #define TWO_LINES     
+ 63 Änderung:  #define FOUR_LINES     
+        In:  //#define FOUR_LINES     
+ 57    Einfg: /**
+ 58    Einfg:  * \ingroup lcd
+ 59    Einfg:  *
+ 60    Einfg:  * \image html LCD_SER.png "serieller Anschluss eines LCD-Display"
+ 61    Einfg:  *
+ 62    Einfg:  * \port
+ 63    Einfg:  * Im 4Bit Mode: (USE_LCD_4Bit == 1)
+ 64    Einfg:  * - PortC Pin0 - LCD D4
+ 65    Einfg:  * - PortC Pin1 - LCD D5
+ 66    Einfg:  * - PortC Pin2 - LCD D6
+ 67    Einfg:  * - PortC Pin3 - LCD D7
+ 68    Einfg:  * - PortC Pin4 - LCD RS
+ 69    Einfg:  * - PortC Pin5 - LCD RW
+ 70    Einfg:  * - PortC Pin6 - LCD Enable
+ 71    Einfg:  * - PortC Pin7 - LCD Busybit
+ 72    Einfg:  * <br><br>
+ 73    Einfg:  * Im seriellen Mode: (USE_LCD_4Bit == 0)
+ 74    Einfg:  * - PortC Pin2 - LCD Enable
+ 75    Einfg:  * - PortC Pin3 - 74AC164 Data
+ 76    Einfg:  * - PortC Pin4 - 74AC164 Clock
+ 77    Einfg:  *
+ 78    Einfg:  */
+------------------------
+  main.c
+ 25    Einfg: #include <stdlib.h>
+ 97 Änderung:  * \addtogroup main Hauptprogramm
+        In:  * \page hardware Hardwareanpassung
+ 99    Einfg:  *
+100    Einfg:  * @{
+101    Einfg:  * Der SD-Kartenslot aus Ulis Shop hat einen Schalter, der geschlo
+102    Einfg:  * die Karte gesteckt ist. Leider ist der Schalter aber auf der Or
+103    Einfg:  * verdrahtet.
+104    Einfg:  *
+105    Einfg:  * \b Abhilfe: einen der Anschlusspins vom Slot (befinden sich an 
+106    Einfg:  * wo der Bestückungsaufdruck MMC1 ist) auf Masse festlöten und de
+107    Einfg:  * mit einem kleinen Draht verbinden. \n
+108    Einfg:  * Ohne den Schalter gibt es einen langen Timeout, wenn man auf di
+109    Einfg:  * zugreifen will und es ist keine Karte gesteckt. Ebenso ist es d
+110    Einfg:  * möglich einen Wechsel der Karte zu erkennen und sie neu zu init
+111    Einfg:  * Siehe dazu die Funktion \ref f16_check().
+112    Einfg:  *
+113    Einfg:  * Ohne diese Hardwareänderung muss im Quelltext in <em>sd_raw_con
+114    Einfg:  * \code #define get_pin_available() ((PINA & (1<<PA6))) \endcode
+115    Einfg:  * nach
+116    Einfg:  * \code #define get_pin_available() (1) \endcode
+117    Einfg:  * abgeändert werden.
+118    Einfg:  *
+119    Einfg:  * Grundsätzlich hier noch ein paar Anmerkungen:
+120    Einfg:  *
+121    Einfg:  * \li <b>Die Webseiten welche von der SD-Karte gelesen werden sol
+122    Einfg:  * Hauptverzeichnis der Karte befinden.</b> Der Code um Dateien au
+123    Einfg:  * Unterverzeichnissen zusammenzusuchen war mir bisher zu aufwendi
+124    Einfg:  * einen Miniwebserver wohl auch nicht nötig.
+125    Einfg:  *
+126    Einfg:  * \li Die <b>Anzeige der Dateien mit Datum, Größe, Berechtigungen
+127    Einfg:  * für FTP nicht definiert. Ich habe bisher keine Ahnung, wie eine
+128    Einfg:  * Verzeichnisanzeige auszusehen hat. Je nach FTP-Client wird dahe
+129    Einfg:  * Verzeichnisstruktur unterschiedlich dargestellt. Mit FileZilla 
+130    Einfg:  * bei mir jedenfalls recht gut.
+131    Einfg:  *
+132    Einfg:  * \li <b>Wie muss man nun vorgehen, wenn man von der SD-Karte ein
+133    Einfg:  * html-Datei erstellen und im Root-Verzeichnis der Karte ablegen.
+134    Einfg:  * (Bilder) auch ins Root-Verzeichnis ablegen, da der Code um die 
+135    Einfg:  * Unterverzeichnis zu suchen zuviel Overhead mit sich bringt. Fal
+136    Einfg:  * Karte abspeichert wird sie direkt aufgerufen. Ansonsten die Dat
+137    Einfg:  * angeben <tt>http://192.168.0.99/default.htm</tt> falls man defa
+138    Einfg:  *
+139    Einfg:  * \li <b>Wie stellt man das an, dass Dateien auf der Karte über d
+140    Einfg:  * Mit FileZilla drauf zugreifen! Wenn man von "außen" auf sein We
+141    Einfg:  * muss man Dyndns einrichten. In der Fritzbox gibt man dann unter
+142    Einfg:  * Webmodul nach außen frei. Am Einfachsten setzt man hierzu den E
+143    Einfg:  * auf die Adresse seines Webmoduls. Es sollte kein Problem bereit
+144    Einfg:  * freizugeben. 
+145    Einfg:  *
+146    Einfg:  * \li <b>Kann ich auch vom AVR-Server darauf zugreifen und wie mu
+147    Einfg:  * Dateien zu erzeugen zu löschen zu laden usw. ?</b>
+148    Einfg:  * Das Webmodul ist ein FTP-Server. Eine FTP-Client-Funktion ist n
+149    Einfg:  * Theoretisch geht das schon wenn man es programmiert.
+150    Einfg:  *
+151    Einfg:  * Praktisch die gesamte Grundkonfiguration des Moduls erfogt in d
+152    Einfg:  * sind je nach Hardwareausstattung und benötigter Funktionalität 
+153    Einfg:  * vorgegeben, die durch setzen von null(0) oder eins(1) entsprech
+154    Einfg:  * werden können.
+155    Einfg:  *
+156    Einfg:  * @}
+157    Einfg:  *
+158    Einfg:  */
+159    Einfg: 
+160    Einfg: /**
+161    Einfg:  * \defgroup main Hauptprogramm
+109    Entf: /**
+110    Entf:  * @}
+111    Entf:  */
+112    Entf: 
+189    Einfg: 
+349    Einfg: 
+350    Einfg:    #if USE_SER_LCD
+351    Einfg:    char zeile[20];
+352    Einfg: 
+353    Einfg:    lcd_clear();
+354    Einfg:    back_light = 1;
+355    Einfg:    lcd_print(0,0,"Aussen ");
+356    Einfg:    dtostrf(ow_array[0] / 10.0,5,1,zeile);
+357    Einfg:    lcd_print_str(zeile);
+358    Einfg:    lcd_print_str("C");
+359    Einfg:    lcd_print(1,0,"Innen  ");
+360    Einfg:    dtostrf(ow_array[1] / 10.0,5,1,zeile);
+361    Einfg:    lcd_print_str(zeile);
+362    Einfg:    lcd_print_str("C");
+363    Einfg:    #endif
+526    Einfg: 
+527    Einfg: /**
+528    Einfg:  * @}
+529    Einfg:  */
+------------------------
+  messung.c
+ 88 Änderung:  SENS_DDR = 0;   // alles auf Eingang
+        In:  SENS_DDR = ~SENS_ACTIVE_PINS;   // aktive Sensoren auf Eingang
+ 89 Änderung:  SENS_PULLUP = 0xff;  // Pullups einschalten
+        In:  SENS_PULLUP = SENS_ACTIVE_PINS;   // Pullups einschalten
+ 90 Änderung:  SENS_INTMASK = 0xff; // auf alle Eingänge reagieren
+        In:  SENS_INTMASK = SENS_ACTIVE_PINS;  // auf aktive Eingänge reagiere
+128    Einfg:   #if OW_EXTERN_POWERED
+129    Einfg:  // T messen: alle gleichzeitig starten
+130    Einfg:  if ( DS18X20_start_meas( DS18X20_POWER_EXTERN, 0 ) == DS18X20_OK 
+131    Einfg:   // warten bis Messung fertig ist.
+132    Einfg:   // DS18S20 braucht die vollen 750ms
+133    Einfg:   // - daher vorsichtshalber volle 750ms warten, falls unterschied
+134    Einfg:   _delay_ms(DS18B20_12_BIT);
+135    Einfg: 
+136    Einfg:   while (tempID[0] != 0) {
+137    Einfg:    if ( DS18X20_read_meas( tempID, &subzero,&cel, &cel_frac_bits) 
+138    Einfg:     TWert = DS18X20_temp_to_decicel(subzero, cel, cel_frac_bits);
+139    Einfg:     if (subzero)
+140    Einfg:      TWert *= (-1);
+141    Einfg:     ow_array[i] = TWert;
+142    Einfg:    }
+143    Einfg:    else {
+144    Einfg:     MES_DEBUG("\r\nCRC Error (lost connection?) ");
+145    Einfg:     DS18X20_show_id_uart( tempID, OW_ROMCODE_SIZE );
+146    Einfg:    }
+147    Einfg: 
+148    Einfg:    memcpy_P(tempID,DS18B20IDs[++i],OW_ROMCODE_SIZE); // nächste ID
+149    Einfg:   }
+150    Einfg:  }
+151    Einfg:  else {
+152    Einfg:   MES_DEBUG("\r\n*** Messung fehlgeschlagen. (Kurzschluss?) ***");
+153    Einfg:  }
+154    Einfg:   #else
+181    Einfg: #endif
+189    Entf: /*
+190    Entf:  läuft jetzt über polling!
+191    Entf: 
+192    Entf:  register bool changed;
+193    Entf:  changed = ((PINA & (1<<SDKARTE_CHECKPIN)) ? false : true); // Pul
+194    Entf:  if (logStatus.SDpresent != changed) {
+195    Entf:   logStatus.SDpresent = changed;
+196    Entf:   machineStatus.LogInit = true; // SD-Karte etc. muss neu initiali
+197    Entf:  }
+198    Entf: */
+------------------------
+  messung.h
+ 44 Änderung: #define SDKARTE_CHECKPIN PINA6
+        In: /**
+ 45 Änderung: 
+        In:  * \port
+ 46 Änderung: #define SENS_Read   PINC //Porteingang an dem die An/Aus Sensoren 
+        In:  * - Port C - An/Aus Sensoren an Pin 0, 1, 5, 6 und 7
+ 47    Einfg:  * - Portausgang mit Schalter an PD4, PD5 und PD6
+ 48    Einfg:  */
+ 49    Einfg: #define SENS_Read   PINC //!< Porteingang an dem die An/Aus Sensor
+ 54    Einfg: #define SENS_ACTIVE_PINS 0xe3 //!< Sensoren an Pin 0, 1, 5, 6 und 
+ 52 Änderung: #define PORT_SCHALTER1  PD4  // Portausgang mit Schalter
+        In: #define PORT_SCHALTER1  PD4  //!< Portausgang mit Schalter
+ 53 Änderung: #define PORT_SCHALTER2  PD5
+        In: #define PORT_SCHALTER2  PD5  //!< Portausgang mit Schalter
+ 54 Änderung: #define PORT_SCHALTER3  PD6
+        In: #define PORT_SCHALTER3  PD6  //!< Portausgang mit Schalter
+ 62    Einfg: 
+------------------------
+  webpage.h
+131 Änderung:  "</tr><tr>\r\n"
+        In:  "</tr>"
+132    Einfg: #if USE_ADC 
+133    Einfg:  "<tr>\r\n"
+146    Einfg: #endif
+------------------------
+  onewire.h
+ 14    Entf: /**
+ 15    Entf:  * @}
+ 16    Entf:  */
+ 35 Änderung: #ifdef OW_ONE_BUS
+        In: #if defined OW_ONE_BUS || DOXYGEN
+ 34    Einfg: /**
+ 35    Einfg:  * \port
+ 36    Einfg:  * - Port D7 - 1-wire Anschluss
+ 37    Einfg:  */
+ 91    Einfg: /**
+ 92    Einfg:  * @}
+ 93    Einfg:  */
+------------------------
+  cam.c
+ 14    Einfg: #include <avr/interrupt.h>
+ 15    Einfg: #include <avr/io.h>
+ 16    Einfg: 
+ 17    Einfg: #include "../config.h"
+ 31 Änderung:  while(!(USR & (1<<UDRE)));
+        In:  while(!(CAM_USR & (1<<CAM_UDRE)));
+ 33 Änderung:  UDR = c;
+        In:  CAM_UDR = c;
+ 69    Entf:  byte = byte + 1;
+135 Änderung:  UCR =(1 << TXEN | 1 << RXEN | 1<< RXCIE);
+        In:  CAM_UCR =(1 << CAM_TXEN | 1 << CAM_RXEN | 1<< CAM_RXCIE);
+138 Änderung:  UBRR=0;
+        In:  CAM_UBRR=0;
+140 Änderung:  USR =(1<<U2X0);
+        In:  CAM_USR =(1<<U2X0);
+141 Änderung:  UBRR=2;
+        In:  CAM_UBRR=2;
+170 Änderung: ISR (USART_RX_CAM)
+        In: ISR (CAM_USART_RX)
+172 Änderung:  char tmp = UDR;
+        In:  char tmp = CAM_UDR;
+174 Änderung:  if(cmd_buffercounter >= cam_dat_start && cmd_buffercounter < cam_
+        In:  if(cmd_buffercounter >= cam_dat_start && cmd_buffercounter < cam_
+------------------------
+  cam.h
+ 10    Entf: #include <config.h>
+ 12 Änderung: #if USE_CAM
+        In: #if USE_CAM || DOXYGEN 
+ 17    Entf:  #include <avr/interrupt.h>
+ 18    Entf:  #include <avr/io.h>
+ 20    Entf:  //---------------------------------------------------------------
+ 22    Entf:  
+ 23    Einfg:   #if defined USE_MMC 
+ 24    Einfg:    #define DAT_BUFFER_SIZE 512
+ 25    Einfg:   #else
+ 28    Einfg:  #endif
+ 44 Änderung:   #define USR UCSR0A
+        In:   #define CAM_USR UCSR0A
+ 45 Änderung:   #define UCR UCSR0B
+        In:   #define CAM_UCR UCSR0B
+ 46 Änderung:   #define UDR UDR0
+        In:   #define CAM_UDR UDR0
+ 47 Änderung:   #define UBRR UBRR0L
+        In:   #define CAM_UBRR UBRR0L
+ 48 Änderung:   #define USART_RX_CAM USART0_RX_vect 
+        In:   #define CAM_USART_RX USART0_RX_vect 
+ 51 Änderung:  #if defined (__AVR_ATmega644__) || defined (__AVR_ATmega644P__)
+        In:  #if defined (__AVR_ATmega644__)
+ 52 Änderung:   #define USR UCSR0A
+        In:   #define CAM_USR UCSR0A
+ 53 Änderung:   #define UCR UCSR0B
+        In:   #define CAM_UCR UCSR0B
+ 54 Änderung:   #define UBRR UBRR0L
+        In:   #define CAM_UBRR UBRR0L
+ 55 Änderung:   #define EICR EICRB
+        In:   #define CAM_EICR EICRB
+ 56 Änderung:   #define TXEN TXEN0
+        In:   #define CAM_TXEN TXEN0
+ 57 Änderung:   #define RXEN RXEN0
+        In:   #define CAM_RXEN RXEN0
+ 58 Änderung:   #define RXCIE RXCIE0
+        In:   #define CAM_RXCIE RXCIE0
+ 59 Änderung:   #define UDR UDR0
+        In:   #define CAM_UDR UDR0
+ 60 Änderung:   #define UDRE UDRE0
+        In:   #define CAM_UDRE UDRE0
+ 61 Änderung:   #define USART_RX_CAM USART0_RX_vect   
+        In:   #define CAM_USART_RX USART0_RX_vect   
+ 61    Einfg:  #endif
+ 62    Einfg:  
+ 63    Einfg:  // CAM an USART1 oder USART0
+ 64    Einfg:  #if defined (__AVR_ATmega644P__) || DOXYGEN 
+ 65    Einfg:   #if USART_USE1
+ 66    Einfg:    /**
+ 67    Einfg:     * \port
+ 68    Einfg:     * - USART1 ist durch Terminal belegt -> CAM an USART0
+ 69    Einfg:     */
+ 70    Einfg:    #define CAM_USR UCSR0A
+ 71    Einfg:    #define CAM_UCR UCSR0B
+ 72    Einfg:    #define CAM_UBRR UBRR0L
+ 73    Einfg:    #define CAM_TXEN TXEN0
+ 74    Einfg:    #define CAM_RXEN RXEN0
+ 75    Einfg:    #define CAM_RXCIE RXCIE0
+ 76    Einfg:    #define CAM_UDR UDR0
+ 77    Einfg:    #define CAM_UDRE UDRE0
+ 78    Einfg:    #define CAM_USART_RX USART0_RX_vect   
+ 79    Einfg:   #else
+ 80    Einfg:    /**
+ 81    Einfg:     * \port
+ 82    Einfg:     * - USART0 ist durch Terminal belegt -> CAM an USART1
+ 83    Einfg:     */
+ 84    Einfg:    #define CAM_USR UCSR1A
+ 85    Einfg:    #define CAM_UCR UCSR1B
+ 86    Einfg:    #define CAM_UBRR UBRR1L
+ 87    Einfg:    #define CAM_TXEN TXEN1
+ 88    Einfg:    #define CAM_RXEN RXEN1
+ 89    Einfg:    #define CAM_RXCIE RXCIE1
+ 90    Einfg:    #define CAM_UDR UDR1
+ 91    Einfg:    #define CAM_UDRE UDRE1
+ 92    Einfg:    #define CAM_USART_RX USART1_RX_vect   
+ 93    Einfg:   #endif
+ 65 Änderung:   #define USR UCSRA
+        In:   #define CAM_USR UCSRA
+ 66 Änderung:   #define UCR UCSRB
+        In:   #define CAM_UCR UCSRB
+ 67 Änderung:   #define UBRR UBRRL
+        In:   #define CAM_UBRR UBRRL
+ 68 Änderung:   #define EICR EICRB
+        In:   #define CAM_EICR EICRB
+ 69 Änderung:   #define USART_RX_CAM USART_RXC_vect  
+        In:   #define CAM_USART_RX USART_RXC_vect  
+ 73 Änderung:   #define USR UCSRA
+        In:   #define CAM_USR UCSRA
+ 74 Änderung:   #define UCR UCSRB
+        In:   #define CAM_UCR UCSRB
+ 75 Änderung:   #define UBRR UBRRL
+        In:   #define CAM_UBRR UBRRL
+ 79 Änderung:   #define USR UCSR0A
+        In:   #define CAM_USR UCSR0A
+ 80 Änderung:   #define UCR UCSR0B
+        In:   #define CAM_UCR UCSR0B
+ 81 Änderung:   #define UBRR UBRR0L
+        In:   #define CAM_UBRR UBRR0L
+ 82 Änderung:   #define TXEN TXEN0
+        In:   #define CAM_TXEN TXEN0
+ 83 Änderung:   #define UDR UDR0
+        In:   #define CAM_UDR UDR0
+ 84 Änderung:   #define UDRE UDRE0
+        In:   #define CAM_UDRE UDRE0
+------------------------
+  servo.c
+ 19 Änderung: #if defined (__AVR_ATmega644__)
+        In: #if defined (__AVR_ATmega644__) || (__AVR_ATmega644P__)
+------------------------
+  servo.h
+  9 Änderung: #include "config.h"
+        In: #include "../config.h"
+ 16 Änderung:  #if defined (__AVR_ATmega644__)
+        In:  #if defined (__AVR_ATmega644__) || defined(__AVR_ATmega644P__)
+------------------------
+  enc28j60.h
+ 16 Änderung:  * ens28j60.h
+        In:  * enc28j60.h
+ 20    Einfg: 
+ 24 Änderung: #if USE_ENC28J60 
+        In: #if USE_ENC28J60 || DOXYGEN 
+ 33    Einfg: /**
+ 34    Einfg:  * \port
+ 35    Einfg:  * - PortB Pin2 (INT2) - Interrupt vom ENC28j60
+ 36    Einfg:  * - PortB Pin3 - Chip Select für ENC28j60
+ 37    Einfg:  * - PortB Pin4 - SS
+ 38    Einfg:  * - PortB Pin5 - MOSI
+ 39    Einfg:  * - PortB Pin6 - MISO
+ 40    Einfg:  * - PortB Pin7 - SCK
+ 41    Einfg:  *
+ 42    Einfg:  */
+------------------------
+  sd_raw.c
+174 Änderung:     /* enable output SS */
+        In:     /* enable output CS */
+175 Änderung:     configure_pin_ss();
+        In:     configure_pin_cs();
+------------------------
+  sd_raw_config.h
+ 60 Änderung: #define configure_pin_ss() DDRB |= (1 << PB4)
+        In: 
+ 61    Einfg: /**
+ 62    Einfg:  * - PortB Pin4 Slave Select für SD-Karte (not used!)
+ 63    Einfg:  */
+ 64    Einfg: //#define configure_pin_ss() DDRB |= (1 << PB4)
+ 65    Einfg: 
+ 66    Einfg: /**
+ 67    Einfg:  * \port
+ 68    Einfg:  * - PortB Pin1 Chip Select für SD-Karte
+ 69    Einfg:  */
+ 63 Änderung: // PortA Pin6 auf Eingang und PullUp anschalten; Schalter zieht au
+        In: /**
+ 73    Einfg:  * \port
+ 74    Einfg:  * - PortA Pin6 auf Eingang und PullUp einschalten;
+ 75    Einfg:  * Schalter zieht auf Masse bei gesteckter SD-Karte
+ 76    Einfg:  */
+ 78    Einfg: 
+ 79    Einfg: /**
+ 80    Einfg:  * \port
+ 81    Einfg:  * - PortA Pin7 auf Eingang und PullUp einschalten;
+ 82    Einfg:  * Schalter zieht auf Masse bei Schreibschutz für SD-Karte
+ 83    Einfg:  */
+------------------------
+  sdcard.c
+ 46 Änderung:  * \addtogroup sdcard SD/MMC Karte
+        In:  * \defgroup sdcard SD/MMC Karte
+ 50    Einfg:  * Die Funktionen aus sdcard.h sollten im Normalfall ausreichen um
+ 51    Einfg:  * SD-Karte anzusprechen. Es wurde versucht mit den <b>f16_<tt>xxx
+ 52    Einfg:  * die Standardfunktionen der C-Standardbibliothek nachzuempfinden
+ 53    Einfg:  * <b>fat16_<tt>xxx</tt></b>, <b>sd_<tt>xxx</tt></b>, <b>spi_<tt>x
+ 54    Einfg:  * <b>partition<tt>xxx</tt></b> sind aus der Bibliothek von Roland
+ 55    Einfg:  * "low level"-Funktionen anzusehen.
+ 56    Einfg:  *
+------------------------
+  tcpcmd.c
+ 63    Einfg: #if USE_CAM
+ 64    Einfg:   #include "../camera/cam.h"
+ 65    Einfg: #endif
+ 66    Einfg: 
+201    Einfg: #if USE_CAM
+202    Einfg: int16_t Bild_speichern(char *);
+203    Einfg: #endif
+204    Einfg: 
+268    Einfg: #if USE_CAM
+269    Einfg: char p_cam[]  PROGMEM = "BILD";
+270    Einfg: #endif
+271    Einfg: 
+350    Einfg: #if USE_CAM
+351    Einfg:  {p_cam,Bild_speichern},
+352    Einfg: #endif
+353    Einfg: 
+808    Einfg: //----------------------------------------------------------------
+809    Einfg: #if USE_CAM
+810    Einfg: /**
+811    Einfg:  * \ingroup tcpcmdcommon
+812    Einfg:  * \b Kamerabild auf SD-Karte speichern
+813    Einfg:  *
+814    Einfg:  * \b Syntax: bild<br>
+815    Einfg:  *
+816    Einfg:  * \author Fred Fröhlich
+817    Einfg:  */
+818    Einfg: int16_t Bild_speichern(char *outbuffer)
+819    Einfg: {
+820    Einfg:  #if USE_MMC  // nur sinnvoll mit SD-Karte
+821    Einfg:  unsigned long apos;
+822    Einfg:  uint16_t a;
+823    Einfg: 
+824    Einfg:  max_bytes = cam_picture_store(CAM_RESELUTION);      //Kamera läd 
+825    Einfg: 
+826    Einfg:  // positive Antwort mit Dateiname in outbuffer speichern
+827    Einfg:  sprintf_P(outbuffer,PSTR("250 Datei: %02i%02i%02i%02i.jpg"),TM_DD
+828    Einfg:  File *picfile = f16_open(outbuffer+11,"a"); // Dateiname beginnt 
+829    Einfg: 
+830    Einfg:  if (picfile) {
+831    Einfg:   apos = 0;
+832    Einfg:   do {
+833    Einfg:    a = 0;
+834    Einfg:    do {
+835    Einfg:     cam_data_get(apos);
+836    Einfg:     apos++;
+837    Einfg:     a++;
+838    Einfg:     if(a==512) break;
+839    Einfg:    } while(apos < max_bytes);
+840    Einfg:    fat16_write_file(picfile, (uint8_t *)&cam_dat_buffer[0], a);
+841    Einfg: 
+842    Einfg:   } while(apos < max_bytes);
+843    Einfg: 
+844    Einfg:   f16_close(picfile);
+845    Einfg:   return strlen(outbuffer); // OK: 250 und Dateiname
+846    Einfg:  }
+847    Einfg:  else
+848    Einfg:  #endif
+849    Einfg:   return cmd_550(outbuffer); // Fehler zurückgeben
+850    Einfg: }
+851    Einfg: #endif //USE_CAM
+852    Einfg: 
+------------------------------------------------------------------------------------------------------
+Unterschiedebericht 1.1.00 -> 1.1.01
+Projekt: $/avr-webserver
+Geändert:
+   messung.c
+   messung.h
+   timer.c
+   translate.c
+   usart.c
+   webpage.h
+   tcpservice/tcpcmd.c
+
+------------------------
+  messung.c
+ 71 Änderung: volatile uint16_t 	ow_array[MAXSENSORS];	//!< Speicherplatz für 1-
+        In: volatile int16_t 	ow_array[MAXSENSORS];	//!< Speicherplatz für 1-w
+------------------------
+   messung.h
+  69 Änderung: extern volatile uint16_t ow_array[MAXSENSORS];	// Speicherplatz fü
+        In: extern volatile int16_t ow_array[MAXSENSORS];	// Speicherplatz für
+------------------------
+  timer.c
+ 77 Änderung: volatile uint8_t TM_DOW;	// Wochentag
+        In: volatile uint8_t TM_DOW;	// Wochentag - 0:Sonntag, 1:Montag ...
+257 Änderung:     TM_DOW = (uint8_t) ((tmp_dow + 4) % 7) ;
+        In:     TM_DOW = (uint8_t) ((tmp_dow + 5) % 7);	// 31.12.1999 war Freitag
+
+------------------------
+   translate.c
+ 47    Einfg: char Tagesnamen[] PROGMEM = "SonMonDieMitDonFreSam";	// 0:Sonntag
+ 48    Einfg: 
+ 56    Einfg:  *	\li	\b WDAY	Wochentag, abgekürzt auf 3 Buchstaben
+110    Einfg: 			else if (strncasecmp_P(src,PSTR("WDAY"),4)==0) {
+111    Einfg: 				FUNCS_DEBUG(" - Wochentag");
+112    Einfg: 				memcpy_P(dest,&Tagesnamen[TM_DOW*3],3);
+113    Einfg: 				dest += 3;
+114    Einfg: 				*dest = '\0';
+115    Einfg: 				src += 4;
+116    Einfg: 			}
+117    Einfg: 
+172 Änderung: 					int8_t j = (int8_t)(ow_array[i] / 10);
+        In: 					dtostrf(ow_array[i] / 10.0,3,1,dest);
+173    Entf: 					itoa (j,dest,10);
+174    Entf: 					while (*dest++)			// neues Ende finden
+175    Entf: 						++len;
+176    Entf: 					--dest;
+177    Entf: 
+178    Entf: 					*dest++ = ',';
+179    Entf: 					++len;
+180    Entf: 
+181    Entf: 					j = ow_array[i] % 10;	// Nachkommastelle
+182    Entf: 					itoa (j,dest,10);
+
+------------------------
+   usart.c
+ 59 Änderung: //#include "stack.h"
+        In: #if CMD_TELNET
+ 60    Einfg: #include "telnetd.h"
+ 61    Einfg: #include "stack.h"
+ 62    Einfg: #endif
+
+------------------------
+   webpage.h
+ 85 Änderung: 	"<p>Der Webserver l&auml;uft !!! %DATE - %TIME</p><BR>\r\n"
+        In: 	"<p>Der Webserver l&auml;uft !!! %WDAY, %DATE - %TIME</p><BR>\r\n
+
+------------------------
+   tcpservice/tcpcmd.c
+843 Änderung:  * \ingroup tcpftp
+        In:  * \ingroup tcpcmdcommon
+865 Änderung:  * \ingroup tcpftp
+        In:  * \ingroup tcpcmdcommon
+879 Änderung:  * \ingroup tcpftp
+        In:  * \ingroup tcpcmdcommon
+
+------------------------

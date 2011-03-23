@@ -1,0 +1,199 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
+<CodeBlocks_project_file>
+	<FileVersion major="1" minor="6" />
+	<Project>
+		<Option title="WebModul" />
+		<Option pch_mode="2" />
+		<Option compiler="avrgcc" />
+		<Build>
+			<Target title="Debug">
+				<Option output="bin/Debug/WebModul.elf" prefix_auto="1" extension_auto="0" />
+				<Option object_output="obj/Debug/" />
+				<Option type="1" />
+				<Option compiler="avrgcc" />
+				<Compiler>
+					<Add option="-g" />
+				</Compiler>
+			</Target>
+			<Target title="Release">
+				<Option output="bin/Release/WebModul.elf" prefix_auto="1" extension_auto="0" />
+				<Option object_output="obj/Release/" />
+				<Option type="1" />
+				<Option compiler="avrgcc" />
+				<Compiler>
+					<Add option="-Os" />
+				</Compiler>
+			</Target>
+		</Build>
+		<Compiler>
+			<Add option="-Wall" />
+			<Add option="-mmcu=atmega644" />
+			<Add option="-DF_CPU=14745600UL" />
+		</Compiler>
+		<Linker>
+			<Add option="-mmcu=atmega644" />
+			<Add option="-Wl,-Map=$(TARGET_OUTPUT_FILE).map,--cref" />
+		</Linker>
+		<ExtraCommands>
+			<Add after="avr-size $(TARGET_OUTPUT_FILE)" />
+			<Add after="avr-objcopy -O ihex -R .eeprom -R .eesafe $(TARGET_OUTPUT_FILE) $(TARGET_OUTPUT_FILE).hex" />
+			<Add after="avr-objcopy --no-change-warnings -j .eeprom --change-section-lma .eeprom=0 -O ihex $(TARGET_OUTPUT_FILE) $(TARGET_OUTPUT_FILE).eep.hex" />
+			<Add after="avr-objcopy -O binary -R .eeprom -R .eesafe $(TARGET_OUTPUT_FILE) $(TARGET_OUTPUT_FILE).bin" />
+			<Add after="avr-objcopy --no-change-warnings -j .eeprom --change-section-lma .eeprom=0 -O binary $(TARGET_OUTPUT_FILE) $(TARGET_OUTPUT_FILE).eep.bin" />
+			<Add after="avr-objdump -h -S $(TARGET_OUTPUT_FILE) &gt; $(TARGET_OUTPUT_FILE).lss" />
+		</ExtraCommands>
+		<Unit filename="1-wire/crc8.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="1-wire/crc8.h" />
+		<Unit filename="1-wire/delay.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="1-wire/delay.h" />
+		<Unit filename="1-wire/ds18x20.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="1-wire/ds18x20.h" />
+		<Unit filename="1-wire/onewire.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="1-wire/onewire.h" />
+		<Unit filename="analog.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="analog.h" />
+		<Unit filename="base64.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="base64.h" />
+		<Unit filename="camera/cam.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="camera/cam.h" />
+		<Unit filename="camera/servo.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="camera/servo.h" />
+		<Unit filename="cmd.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="cmd.h" />
+		<Unit filename="config.h" />
+		<Unit filename="dns.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="dns.h" />
+		<Unit filename="http_get.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="http_get.h" />
+		<Unit filename="httpd.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="httpd.h" />
+		<Unit filename="lcd.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="lcd.h" />
+		<Unit filename="main.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="makefile" />
+		<Unit filename="messung.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="messung.h" />
+		<Unit filename="networkcard/enc28j60.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="networkcard/enc28j60.h" />
+		<Unit filename="networkcard/rtl8019.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="networkcard/rtl8019.h" />
+		<Unit filename="ntp.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="ntp.h" />
+		<Unit filename="rc5/rc5.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="rc5/rc5.h" />
+		<Unit filename="sdkarte/fat16.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="sdkarte/fat16.h" />
+		<Unit filename="sdkarte/fat16_config.h" />
+		<Unit filename="sdkarte/partition.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="sdkarte/partition.h" />
+		<Unit filename="sdkarte/partition_config.h" />
+		<Unit filename="sdkarte/sd-reader_config.h" />
+		<Unit filename="sdkarte/sd.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="sdkarte/sd.h" />
+		<Unit filename="sdkarte/sd_config.h" />
+		<Unit filename="sdkarte/sd_raw.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="sdkarte/sd_raw.h" />
+		<Unit filename="sdkarte/sd_raw_config.h" />
+		<Unit filename="sdkarte/sdcard.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="sdkarte/sdcard.h" />
+		<Unit filename="sdkarte/spi.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="sdkarte/spi.h" />
+		<Unit filename="sdkarte/spi_config.h" />
+		<Unit filename="sendmail.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="sendmail.h" />
+		<Unit filename="stack.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="stack.h" />
+		<Unit filename="tcpservice/tcpcmd.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="tcpservice/tcpcmd.h" />
+		<Unit filename="tcpservice/tcpsrv.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="tcpservice/tcpsrv.h" />
+		<Unit filename="telnetd.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="telnetd.h" />
+		<Unit filename="timer.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="timer.h" />
+		<Unit filename="translate.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="translate.h" />
+		<Unit filename="udp_lcd.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="udp_lcd.h" />
+		<Unit filename="usart.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="usart.h" />
+		<Unit filename="webpage.h" />
+		<Unit filename="wol.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="wol.h" />
+		<Extensions>
+			<code_completion />
+			<envvars />
+			<debugger />
+		</Extensions>
+	</Project>
+</CodeBlocks_project_file>

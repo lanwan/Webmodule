@@ -1,0 +1,197 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
+<CodeBlocks_project_file>
+	<FileVersion major="1" minor="6" />
+	<Project>
+		<Option title="WebServer" />
+		<Option pch_mode="2" />
+		<Option compiler="avrgcc" />
+		<Build>
+			<Target title="Debug">
+				<Option output="bin/Debug/WebServer.elf" prefix_auto="1" extension_auto="0" />
+				<Option object_output="obj/Debug/" />
+				<Option type="1" />
+				<Option compiler="avrgcc" />
+				<Compiler>
+					<Add option="-g" />
+					<Add option="-std=c99" />
+				</Compiler>
+			</Target>
+			<Target title="Release">
+				<Option output="bin/Release/WebServer.elf" prefix_auto="1" extension_auto="0" />
+				<Option object_output="obj/Release/" />
+				<Option type="1" />
+				<Option compiler="avrgcc" />
+				<Compiler>
+					<Add option="-Os" />
+				</Compiler>
+			</Target>
+		</Build>
+		<Compiler>
+			<Add option="-Wall" />
+			<Add option="-mmcu=atmega644p" />
+			<Add option="-DF_CPU=16000000UL" />
+		</Compiler>
+		<Linker>
+			<Add option="-mmcu=atmega644p" />
+			<Add option="-Wl,-Map=$(TARGET_OUTPUT_FILE).map,--cref" />
+		</Linker>
+		<ExtraCommands>
+			<Add after="avr-objcopy -O ihex -R .eeprom -R .eesafe $(TARGET_OUTPUT_FILE) $(TARGET_OUTPUT_FILE).hex" />
+			<Add after="avr-objcopy --no-change-warnings -j .eeprom --change-section-lma .eeprom=0 -O ihex $(TARGET_OUTPUT_FILE) $(TARGET_OUTPUT_FILE).eep.hex" />
+			<Add after="avr-objdump -h -S $(TARGET_OUTPUT_FILE) &gt; $(TARGET_OUTPUT_FILE).lss" />
+		</ExtraCommands>
+		<Unit filename="../avr-webserver/1-wire/crc8.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="../avr-webserver/1-wire/crc8.h" />
+		<Unit filename="../avr-webserver/1-wire/delay.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="../avr-webserver/1-wire/delay.h" />
+		<Unit filename="../avr-webserver/1-wire/ds18x20.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="../avr-webserver/1-wire/ds18x20.h" />
+		<Unit filename="../avr-webserver/1-wire/onewire.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="../avr-webserver/1-wire/onewire.h" />
+		<Unit filename="../avr-webserver/analog.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="../avr-webserver/analog.h" />
+		<Unit filename="../avr-webserver/base64.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="../avr-webserver/base64.h" />
+		<Unit filename="../avr-webserver/camera/cam.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="../avr-webserver/camera/cam.h" />
+		<Unit filename="../avr-webserver/camera/servo.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="../avr-webserver/camera/servo.h" />
+		<Unit filename="../avr-webserver/cmd.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="../avr-webserver/cmd.h" />
+		<Unit filename="../avr-webserver/config.h" />
+		<Unit filename="../avr-webserver/dns.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="../avr-webserver/dns.h" />
+		<Unit filename="../avr-webserver/http_get.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="../avr-webserver/http_get.h" />
+		<Unit filename="../avr-webserver/httpd.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="../avr-webserver/httpd.h" />
+		<Unit filename="../avr-webserver/lcd.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="../avr-webserver/lcd.h" />
+		<Unit filename="../avr-webserver/main.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="../avr-webserver/messung.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="../avr-webserver/messung.h" />
+		<Unit filename="../avr-webserver/networkcard/enc28j60.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="../avr-webserver/networkcard/enc28j60.h" />
+		<Unit filename="../avr-webserver/networkcard/rtl8019.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="../avr-webserver/networkcard/rtl8019.h" />
+		<Unit filename="../avr-webserver/ntp.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="../avr-webserver/ntp.h" />
+		<Unit filename="../avr-webserver/rc5/rc5.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="../avr-webserver/rc5/rc5.h" />
+		<Unit filename="../avr-webserver/sdkarte/fat16.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="../avr-webserver/sdkarte/fat16.h" />
+		<Unit filename="../avr-webserver/sdkarte/fat16_config.h" />
+		<Unit filename="../avr-webserver/sdkarte/partition.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="../avr-webserver/sdkarte/partition.h" />
+		<Unit filename="../avr-webserver/sdkarte/partition_config.h" />
+		<Unit filename="../avr-webserver/sdkarte/sd-reader_config.h" />
+		<Unit filename="../avr-webserver/sdkarte/sd.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="../avr-webserver/sdkarte/sd.h" />
+		<Unit filename="../avr-webserver/sdkarte/sd_config.h" />
+		<Unit filename="../avr-webserver/sdkarte/sd_raw.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="../avr-webserver/sdkarte/sd_raw.h" />
+		<Unit filename="../avr-webserver/sdkarte/sd_raw_config.h" />
+		<Unit filename="../avr-webserver/sdkarte/sdcard.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="../avr-webserver/sdkarte/sdcard.h" />
+		<Unit filename="../avr-webserver/sdkarte/spi.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="../avr-webserver/sdkarte/spi.h" />
+		<Unit filename="../avr-webserver/sdkarte/spi_config.h" />
+		<Unit filename="../avr-webserver/sendmail.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="../avr-webserver/sendmail.h" />
+		<Unit filename="../avr-webserver/stack.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="../avr-webserver/stack.h" />
+		<Unit filename="../avr-webserver/tcpservice/tcpcmd.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="../avr-webserver/tcpservice/tcpcmd.h" />
+		<Unit filename="../avr-webserver/tcpservice/tcpsrv.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="../avr-webserver/tcpservice/tcpsrv.h" />
+		<Unit filename="../avr-webserver/telnetd.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="../avr-webserver/telnetd.h" />
+		<Unit filename="../avr-webserver/timer.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="../avr-webserver/timer.h" />
+		<Unit filename="../avr-webserver/translate.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="../avr-webserver/translate.h" />
+		<Unit filename="../avr-webserver/udp_lcd.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="../avr-webserver/udp_lcd.h" />
+		<Unit filename="../avr-webserver/usart.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="../avr-webserver/usart.h" />
+		<Unit filename="../avr-webserver/webpage.h" />
+		<Unit filename="../avr-webserver/wol.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="../avr-webserver/wol.h" />
+		<Extensions>
+			<code_completion />
+			<envvars />
+			<lib_finder disable_auto="1" />
+			<debugger />
+		</Extensions>
+	</Project>
+</CodeBlocks_project_file>
